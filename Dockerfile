@@ -5,7 +5,7 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install -r requirements.txt
 
-COPY . .
+COPY main .
 
 ENV BOT_TOKEN=${BOT_TOKEN}
 ENV GOOGLE_CRED=${GOOGLE_CRED}
