@@ -23,14 +23,21 @@ async def process_update(update):
 @app.route(WEBHOOK_PATH, methods=['POST'])
 def webhook():
     """Отримує оновлення від Telegram через вебхук."""
+    print(f"Отримано запит на {WEBHOOK_PATH}")
+    print(f"Заголовки: {request.headers}")
+    data = request.get_data()
+    print(f"Отримані дані: {data}")
     try:
-        data = request.get_json()
-        update = Update.de_json(data, application.bot)
+        data_json = request.get_json()
+        print(f"JSON дані: {data_json}")
+        update = Update.de_json(data_json, application.bot)
         asyncio.run(process_update(update))
     except Exception as e:
         print(f"Помилка обробки вебхука: {e}")
         return jsonify({"status": "error"}), 500
     return jsonify({"status": "ok"})
+
+
 
 async def main():
     """Запускає вебсервер Flask."""
