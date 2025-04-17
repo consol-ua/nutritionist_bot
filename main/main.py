@@ -25,6 +25,7 @@ def webhook():
     """Отримує оновлення від Telegram через вебхук."""
     try:
         data = request.get_json()
+        print(f"Отримано оновлення: {data}")  # Додано логування
         update = Update.de_json(data, application.bot)
         asyncio.run(process_update(update))
     except Exception as e:
@@ -32,11 +33,7 @@ def webhook():
         return jsonify({"status": "error"}), 500
     return jsonify({"status": "ok"})
 
-async def main():
-    """Запускає вебсервер Flask."""
-    await application.initialize()
-    # Не запускайте вебхук через python-telegram-bot, Flask сам обробляє запити
-    print(f"Вебсервер Flask запущено на порту {os.environ.get('PORT', 8080)}, шлях вебхука: {WEBHOOK_PATH}")
-
 if __name__ == "__main__":
+    asyncio.run(application.initialize())
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 8080)))
+  

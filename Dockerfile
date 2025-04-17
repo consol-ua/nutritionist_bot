@@ -6,9 +6,6 @@ COPY requirements.txt .
 RUN pip install -r requirements.txt
 
 COPY main/ .  
-# Note the trailing slash
-# Alternatively, if 'main' contains only python files:
-# COPY main/*.py .
 
 ENV BOT_TOKEN=${BOT_TOKEN}
 ENV GOOGLE_CRED=${GOOGLE_CRED}

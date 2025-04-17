@@ -15,6 +15,8 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     print(f"Значення user id: {user.id}")  # Виводимо значення user id
 
+    # await update.message.text("hellos")
+
     if user_exists(sheet, user.id):
         await update.message.reply_text("👋 Привіт ще раз! Ти вже в системі 😊", reply_markup=ReplyKeyboardRemove()) #Прибираємо клавіатуру
     else:
