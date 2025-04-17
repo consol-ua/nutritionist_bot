@@ -5,7 +5,8 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install -r requirements.txt
 
-COPY main/ .  # Note the trailing slash
+COPY main/ .  
+# Note the trailing slash
 # Alternatively, if 'main' contains only python files:
 # COPY main/*.py .
 

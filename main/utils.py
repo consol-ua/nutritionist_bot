@@ -1,22 +1,24 @@
 # utils.py
 import gspread
-from google.oauth2.service_account import Credentials
+import google.auth
 import os
 from dotenv import load_dotenv
 
 load_dotenv()
 
-GOOGLE_CRED = os.getenv("GOOGLE_SHEETS_CRED")
 SHEET_NAME = os.getenv("GOOGLE_SHEET_NAME")
 
 def get_sheet():
     """
-    Отримує доступ до Google Sheet.
+    Отримує доступ до Google Sheet, використовуючи автентифікацію за замовчуванням Google Cloud.
     """
-    scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-    creds = Credentials.from_service_account_file(GOOGLE_CRED, scopes=scope)
-    client = gspread.authorize(creds)
-    return client.open(SHEET_NAME).sheet1
+    try:
+        creds, _ = google.auth.default()
+        client = gspread.authorize(creds)
+        return client.open(SHEET_NAME).sheet1
+    except Exception as e:
+        print(f"Помилка автентифікації Google Cloud: {e}")
+        raise
 
 def user_exists(sheet, user_id):
     """
