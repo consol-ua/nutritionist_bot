@@ -23,6 +23,10 @@ async def process_update(update):
 @app.route(WEBHOOK_PATH, methods=['POST'])
 def webhook():
     """Отримує оновлення від Telegram через вебхук."""
+    print(f"Отримано запит на {WEBHOOK_PATH}")
+    print(f"Заголовки: {request.headers}")
+    data = request.get_data()
+    print(f"Отримані дані: {data}")
     try:
         data = request.get_json()
         print(f"Отримано оновлення: {data}")  # Додано логування
