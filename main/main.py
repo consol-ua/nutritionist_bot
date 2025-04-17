@@ -1,100 +1,49 @@
+# bot.py
 import os
-import gspread
-from datetime import datetime
 from dotenv import load_dotenv
-from google.oauth2.service_account import Credentials
-from telegram import Update, KeyboardButton, ReplyKeyboardMarkup, ReplyKeyboardRemove
-from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, ContextTypes
+from telegram.ext import Update, ApplicationBuilder, CommandHandler, MessageHandler, filters
+from handlers import start, contact_handler
+from flask import Flask, request, jsonify
+import asyncio
 
 load_dotenv()
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
-GOOGLE_CRED = os.getenv("GOOGLE_SHEETS_CRED")
-SHEET_NAME = os.getenv("GOOGLE_SHEET_NAME")
+WEBHOOK_URL = os.getenv("WEBHOOK_URL")  # URL вашого сервісу Cloud Run
+WEBHOOK_PATH = "/webhook"  # Шлях, на який Telegram надсилатиме оновлення
 
-def get_sheet():
-    """
-    Отримує доступ до Google Sheet.
-    """
-    scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-    creds = Credentials.from_service_account_file(GOOGLE_CRED, scopes=scope)
-    client = gspread.authorize(creds)
-    return client.open(SHEET_NAME).sheet1
+app = Flask(__name__)
+application = ApplicationBuilder().token(BOT_TOKEN).build()
+application.add_handler(CommandHandler("start", start))
+application.add_handler(MessageHandler(filters.CONTACT, contact_handler))
 
-def user_exists(sheet, user_id):
-    """
-    Перевіряє, чи існує користувач у таблиці.
+async def process_update(update):
+    await application.process_update(update)
 
-    Args:
-        sheet: Аркуш Google Sheet.
-        user_id: ID користувача Telegram.
+@app.route(WEBHOOK_PATH, methods=['POST'])
+def webhook():
+    """Отримує оновлення від Telegram через вебхук."""
+    try:
+        data = request.get_json()
+        update = Update.de_json(data, application.bot)
+        asyncio.run(process_update(update))
+    except Exception as e:
+        print(f"Помилка обробки вебхука: {e}")
+        return jsonify({"status": "error"}), 500
+    return jsonify({"status": "ok"})
 
-    Returns:
-        True, якщо користувач існує, інакше False.
-    """
-    records = sheet.get_all_records()
-    print(f"Значення records: {records}")  # Виводимо значення records
-    return any(str(row.get("User ID")) == str(user_id) for row in records)
-
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """
-    Обробляє команду /start.  Якщо користувач вже в базі, вітає його,
-    інакше пропонує надіслати номер телефону.
-    """
-    user = update.effective_user
-    
-    sheet = get_sheet()
-
-    print(f"Значення user id: {user.id}")  # Виводимо значення user id
-
-    if user_exists(sheet, user.id):
-        await update.message.reply_text("👋 Привіт ще раз! Ти вже в системі 😊", reply_markup=ReplyKeyboardRemove()) #Прибираємо клавіатуру
-    else:
-        # Кнопка для надсилання номера телефону
-        button = KeyboardButton("📱 Надіслати номер", request_contact=True)
-        keyboard = ReplyKeyboardMarkup([[button]], resize_keyboard=True, one_time_keyboard=True)
-        await update.message.reply_text(
-            "Привіт! Щоб зареєструватись, надішли, будь ласка, свій номер телефону:",
-            reply_markup=keyboard
-        )
-
-async def contact_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """
-    Обробляє отриманий контактний номер телефону.
-    Додає користувача до таблиці, якщо його там ще немає.
-    """
-    user = update.effective_user
-    contact = update.message.contact
-
-    if contact and contact.user_id == user.id:
-        phone = contact.phone_number
-        sheet = get_sheet()
-
-        if not user_exists(sheet, user.id):
-            row = [
-                user.first_name or "",
-                user.last_name or "",
-                f"@{user.username}" if user.username else "",
-                user.id,
-                phone,
-                datetime.now().strftime("%Y-%m-%d")
-            ]
-            sheet.append_row(row)
-            await update.message.reply_text("✅ Дякую! Тебе додано в таблицю.", reply_markup=ReplyKeyboardRemove()) #Прибираємо клавіатуру після обробки
-        else:
-            await update.message.reply_text("Ти вже зареєстрований 😊", reply_markup=ReplyKeyboardRemove()) #Прибираємо клавіатуру
-    else:
-        await update.message.reply_text("⚠️ Можна надсилати тільки свій контакт.")
-
-def main():
-    """
-    Запускає Telegram-бота.
-    """
-    app = ApplicationBuilder().token(BOT_TOKEN).build()
-    app.add_handler(CommandHandler("start", start))
-    app.add_handler(MessageHandler(filters.CONTACT, contact_handler))
-    print("Бот працює. Очікує контакти...")
-    app.run_polling()
+async def main():
+    """Запускає вебсервер Flask."""
+    await application.initialize()
+    await application.updater.start_webhook(
+        listen="0.0.0.0",
+        port=int(os.environ.get("PORT", 8080)),
+        path=WEBHOOK_PATH,
+        webhook_url=WEBHOOK_URL + WEBHOOK_PATH
+    )
+    # Keep the app running
+    # await application.updater.idle() # Не використовувати idle() з Flask
+    print(f"Вебхук встановлено на: {WEBHOOK_URL + WEBHOOK_PATH}")
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())
