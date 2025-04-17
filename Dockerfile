@@ -13,4 +13,4 @@ ENV GOOGLE_SHEET_NAME=${SHEET_NAME}
 ENV WEBHOOK_URL=${WEBHOOK_URL}
 ENV PORT 8080
 
-CMD ["python", "bot.py"]
+CMD ["python", "main/main.py"]
