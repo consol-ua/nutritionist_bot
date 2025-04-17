@@ -10,7 +10,6 @@ import asyncio
 load_dotenv()
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
-WEBHOOK_URL = os.getenv("WEBHOOK_URL")  # URL вашого сервісу Cloud Run
 WEBHOOK_PATH = "/webhook"  # Шлях, на який Telegram надсилатиме оновлення
 
 app = Flask(__name__)
@@ -36,15 +35,8 @@ def webhook():
 async def main():
     """Запускає вебсервер Flask."""
     await application.initialize()
-    await application.updater.start_webhook(
-        listen="0.0.0.0",
-        port=int(os.environ.get("PORT", 8080)),
-        path=WEBHOOK_PATH,
-        webhook_url=WEBHOOK_URL + WEBHOOK_PATH
-    )
-    # Keep the app running
-    # await application.updater.idle() # Не використовувати idle() з Flask
-    print(f"Вебхук встановлено на: {WEBHOOK_URL + WEBHOOK_PATH}")
+    # Не запускайте вебхук через python-telegram-bot, Flask сам обробляє запити
+    print(f"Вебсервер Flask запущено на порту {os.environ.get('PORT', 8080)}, шлях вебхука: {WEBHOOK_PATH}")
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 8080)))
