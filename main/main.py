@@ -1,7 +1,8 @@
 # bot.py
 import os
 from dotenv import load_dotenv
-from telegram.ext import Update, ApplicationBuilder, CommandHandler, MessageHandler, filters
+from telegram import Update
+from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters
 from handlers import start, contact_handler
 from flask import Flask, request, jsonify
 import asyncio
