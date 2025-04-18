@@ -5,27 +5,26 @@ from datetime import datetime
 from utils import get_sheet, user_exists
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    welcome_message = "Привіт! Це базовий бот який вносить данні в google sheet"
+    
+    await update.message.reply_text(welcome_message)
+
     """
     Обробляє команду /start.  Якщо користувач вже в базі, вітає його,
     інакше пропонує надіслати номер телефону.
     """
     user = update.effective_user
 
-    print(f"Значення user id: {user.id}")  # Виводимо значення user id
-
     sheet = get_sheet()
 
-
-    await update.message.reply_text("hellos")
-
     if user_exists(sheet, user.id):
-        await update.message.reply_text("👋 Привіт ще раз! Ти вже в системі 😊", reply_markup=ReplyKeyboardRemove()) #Прибираємо клавіатуру
+        await update.message.reply_text("👋 Ти вже в системі 😊", reply_markup=ReplyKeyboardRemove()) #Прибираємо клавіатуру
     else:
         # Кнопка для надсилання номера телефону
         button = KeyboardButton("📱 Надіслати номер", request_contact=True)
         keyboard = ReplyKeyboardMarkup([[button]], resize_keyboard=True, one_time_keyboard=True)
         await update.message.reply_text(
-            "Привіт! Щоб зареєструватись, надішли, будь ласка, свій номер телефону:",
+            "Щоб зареєструватись, надішли, будь ласка, свій номер телефону:",
             reply_markup=keyboard
         )
 
