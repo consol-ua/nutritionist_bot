@@ -4,7 +4,9 @@ import google.auth
 import os
 from dotenv import load_dotenv
 
-load_dotenv()
+# # ⬇️ Завантажує змінні з .env (тільки локально, не потрібне в продакшені)
+# dotenv_path = os.path.join(os.path.dirname(__file__), '..', '.env')
+# load_dotenv(dotenv_path)
 
 SHEET_NAME = os.getenv("GOOGLE_SHEET_NAME")
 
