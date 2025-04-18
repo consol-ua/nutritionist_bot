@@ -20,21 +20,24 @@ application.add_handler(MessageHandler(filters.CONTACT, contact_handler))
 async def process_update(update):
     await application.process_update(update)
 
+loop = asyncio.new_event_loop()
+asyncio.set_event_loop(loop)
+
 @app.route(WEBHOOK_PATH, methods=['POST'])
 def webhook():
     """Отримує оновлення від Telegram через вебхук."""
-    print(f"Отримано запит на {WEBHOOK_PATH}")
-    print(f"Заголовки: {request.headers}")
-    data = request.get_data()
-    print(f"Отримані дані: {data}")
     try:
         data = request.get_json()
-        print(f"Отримано оновлення: {data}")  # Додано логування
+        print(f"Отримано оновлення: {data}")
         update = Update.de_json(data, application.bot)
-        asyncio.run(process_update(update))
+
+        # 🧠 Ключовий момент: не run, а run_coroutine_threadsafe
+        asyncio.run_coroutine_threadsafe(process_update(update), loop)
+
     except Exception as e:
         print(f"Помилка обробки вебхука: {e}")
         return jsonify({"status": "error"}), 500
+
     return jsonify({"status": "ok"})
 
 if __name__ == "__main__":
