@@ -1,4 +1,4 @@
-# bot.py
+# main.py
 import os
 from dotenv import load_dotenv
 from telegram import Update
@@ -7,9 +7,14 @@ from handlers import start, contact_handler
 from flask import Flask, request, jsonify
 import asyncio
 
-load_dotenv()
+# load_dotenv() 
+# тільки локально
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
+WEBHOOK_URL = os.getenv("WEBHOOK_URL")
+PORT = int(os.getenv("PORT", 8080))
+# для гугл клауд
+
 WEBHOOK_PATH = "/webhook"  # Шлях, на який Telegram надсилатиме оновлення
 
 app = Flask(__name__)
