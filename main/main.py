@@ -1,9 +1,9 @@
 import os
 import asyncio
 from dotenv import load_dotenv
-from telegram import Update
-from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, ConversationHandler
-from handlers import start, contact_handler, export_users, handle_sheet_url, WAITING_FOR_SHEET_URL
+from telegram import Update, BotCommand, BotCommandScopeDefault
+from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, ConversationHandler, CallbackQueryHandler
+from handlers import start, contact_handler, export_users, handle_sheet_url, WAITING_FOR_SHEET_URL, button_callback, handle_text_message
 from flask import Flask, request, jsonify
 import threading
 from database import db
@@ -21,8 +21,29 @@ WEBHOOK_PATH = "/webhook"
 app = Flask(__name__)
 application = ApplicationBuilder().token(BOT_TOKEN).build()
 
+# Налаштування команд меню
+async def setup_commands():
+    commands = [
+        BotCommand("start", "🏠 Головне меню"),
+        BotCommand("cabinet", "👤 Особистий кабінет"),
+        BotCommand("contact", "📱 Зв'язок зі мною"),
+        BotCommand("export", "📊 Експортувати користувачів")
+    ]
+    
+    # Видаляємо старі команди
+    await application.bot.delete_my_commands()
+    
+    # Встановлюємо команди для всіх чатів
+    await application.bot.set_my_commands(
+        commands,
+        scope=BotCommandScopeDefault()
+    )
+
 # Обробники
 application.add_handler(CommandHandler("start", start))
+application.add_handler(CommandHandler("cabinet", lambda update, context: button_callback(update, context, "personal_cabinet")))
+application.add_handler(CommandHandler("contact", lambda update, context: button_callback(update, context, "contact_menu")))
+application.add_handler(CallbackQueryHandler(button_callback))
 application.add_handler(ConversationHandler(
     entry_points=[CommandHandler("export", export_users)],
     states={
@@ -31,6 +52,9 @@ application.add_handler(ConversationHandler(
     fallbacks=[]
 ))
 application.add_handler(MessageHandler(filters.CONTACT, contact_handler))
+
+# Додаємо обробник текстових повідомлень (має бути останнім)
+application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_text_message))
 
 # Обробка Telegram-оновлень
 async def process_update(update):
@@ -71,6 +95,9 @@ def ping():
 if __name__ == "__main__":
     # Ініціалізуємо Telegram Application
     loop.run_until_complete(application.initialize())
+    
+    # Налаштовуємо команди меню
+    loop.run_until_complete(setup_commands())
 
     # Flask запускається на всіх інтерфейсах
     app.run(host="0.0.0.0", port=PORT)
