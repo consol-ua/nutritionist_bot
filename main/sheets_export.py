@@ -1,13 +1,11 @@
 import gspread
-from google.oauth2 import service_account
-import os
 from database import db
+import google.auth
 
 def get_sheet():
     """Підключається до Google Sheets та повертає об'єкт таблиці"""
     # Використовуємо вбудовані облікові дані Google Cloud Run
-    credentials = service_account.Credentials.get_application_default()
-    credentials = credentials.with_scopes(['https://www.googleapis.com/auth/spreadsheets'])
+    credentials, _ = google.auth.default()
     
     gc = gspread.authorize(credentials)
     sheet_name = 'Nutritionist-user-data'  # Фіксована назва таблиці
