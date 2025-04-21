@@ -1,6 +1,7 @@
 from google.cloud import firestore
 from datetime import datetime
 from typing import Optional, Dict, Any
+import google.auth
 
 class FirestoreDB:
     def __init__(self):
@@ -11,7 +12,9 @@ class FirestoreDB:
         клієнтська бібліотека автоматично використовує ідентифікацію сервісу.
         Якщо код виконується локально, потрібно налаштувати GOOGLE_APPLICATION_CREDENTIALS.
         """
-        self.db = firestore.Client()  # Клієнтська бібліотека обробляє аутентифікацію
+        credentials, _ = google.auth.default()
+
+        self.db = firestore.Client(credentials)
         self.users_collection = self.db.collection('users')
     
     def user_exists(self, user_id: int) -> bool:
