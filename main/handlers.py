@@ -216,7 +216,7 @@ async def handle_text_message(update: Update, context: ContextTypes.DEFAULT_TYPE
         await update.message.reply_text("📱 Зв'язок зі мною", reply_markup=InlineKeyboardMarkup(keyboard))
     
     elif text == "📊 Експортувати користувачів":
-        await export_users(update.message, context)
+        await export_users(update, context)
 
 async def start_survey(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Початок опитування"""
