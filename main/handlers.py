@@ -2,8 +2,8 @@
 from telegram import Update, KeyboardButton, ReplyKeyboardMarkup, ReplyKeyboardRemove
 from telegram.ext import ContextTypes
 from datetime import datetime
-from .database import db
-from .sheets_export import export_users_to_sheet
+from database import db
+from sheets_export import export_users_to_sheet
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     welcome_message = "Привіт! Це бот для ведення дієти та харчування"
