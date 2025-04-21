@@ -1,20 +1,17 @@
 from google.cloud import firestore
-from google.oauth2 import service_account
-import os
-from dotenv import load_dotenv
 from datetime import datetime
 from typing import Optional, Dict, Any
 
-load_dotenv()
-
 class FirestoreDB:
     def __init__(self):
-        credentials_path = os.getenv('GOOGLE_APPLICATION_CREDENTIALS')
-        if not credentials_path:
-            raise ValueError("GOOGLE_APPLICATION_CREDENTIALS не встановлено в .env файлі")
-        
-        credentials = service_account.Credentials.from_service_account_file(credentials_path)
-        self.db = firestore.Client(credentials=credentials)
+        """
+        Ініціалізує підключення до Firestore.
+
+        Якщо код виконується в середовищі Google Cloud (наприклад, Cloud Run),
+        клієнтська бібліотека автоматично використовує ідентифікацію сервісу.
+        Якщо код виконується локально, потрібно налаштувати GOOGLE_APPLICATION_CREDENTIALS.
+        """
+        self.db = firestore.Client()  # Клієнтська бібліотека обробляє аутентифікацію
         self.users_collection = self.db.collection('users')
         self.sessions_collection = self.db.collection('sessions')
         self.meals_collection = self.db.collection('meals')
@@ -64,4 +61,4 @@ class FirestoreDB:
         self.nutrition_plans_collection.add(plan_data)
 
 # Створюємо глобальний екземпляр бази даних
-db = FirestoreDB() 
+db = FirestoreDB()
