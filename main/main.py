@@ -2,8 +2,8 @@ import os
 import asyncio
 from dotenv import load_dotenv
 from telegram import Update
-from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters
-from handlers import start, contact_handler, export_users
+from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, ConversationHandler
+from handlers import start, contact_handler, export_users, handle_sheet_url, WAITING_FOR_SHEET_URL
 from flask import Flask, request, jsonify
 import threading
 from database import db
@@ -23,7 +23,13 @@ application = ApplicationBuilder().token(BOT_TOKEN).build()
 
 # Обробники
 application.add_handler(CommandHandler("start", start))
-application.add_handler(CommandHandler("export", export_users))
+application.add_handler(ConversationHandler(
+    entry_points=[CommandHandler("export", export_users)],
+    states={
+        WAITING_FOR_SHEET_URL: [MessageHandler(filters.TEXT & ~filters.COMMAND, handle_sheet_url)]
+    },
+    fallbacks=[]
+))
 application.add_handler(MessageHandler(filters.CONTACT, contact_handler))
 
 # Обробка Telegram-оновлень

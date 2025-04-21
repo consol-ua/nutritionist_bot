@@ -1,9 +1,12 @@
 # handlers.py
 from telegram import Update, KeyboardButton, ReplyKeyboardMarkup, ReplyKeyboardRemove
-from telegram.ext import ContextTypes
+from telegram.ext import ContextTypes, ConversationHandler
 from datetime import datetime
 from database import db
 from sheets_export import export_users_to_sheet
+
+# Стани для ConversationHandler
+WAITING_FOR_SHEET_URL = 1
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     welcome_message = "Привіт! Це бот для ведення дієти та харчування"
@@ -55,9 +58,18 @@ async def contact_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("⚠️ Можна надсилати тільки свій контакт.")
 
 async def export_users(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Експортує користувачів в Google Sheets"""
+    """Запитує посилання на таблицю для експорту"""
+    await update.message.reply_text("🔗 Будь ласка, надішліть посилання на Google Sheets таблицю, куди потрібно експортувати дані:")
+    return WAITING_FOR_SHEET_URL
+
+async def handle_sheet_url(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Обробляє отримане посилання на таблицю та виконує експорт"""
+    sheet_url = update.message.text
+    
     try:
-        result = export_users_to_sheet()
+        result = export_users_to_sheet(sheet_url)
         await update.message.reply_text(result)
     except Exception as e:
         await update.message.reply_text(f"❌ Помилка при експорті: {str(e)}")
+    
+    return ConversationHandler.END

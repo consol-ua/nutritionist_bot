@@ -2,25 +2,32 @@ import gspread
 from database import db
 import google.auth
 
-def get_sheet():
+def get_sheet(sheet_url=None):
     """Підключається до Google Sheets та повертає об'єкт таблиці"""
     # Використовуємо вбудовані облікові дані Google Cloud Run
     credentials, _ = google.auth.default()
     
     gc = gspread.authorize(credentials)
-    sheet_name = 'Nutritionist-user-data'  # Фіксована назва таблиці
     
-    try:
-        sheet = gc.open(sheet_name)
-    except gspread.exceptions.SpreadsheetNotFound:
-        sheet = gc.create(sheet_name)
-        sheet.share(None, perm_type='anyone', role='reader')
-    
-    return sheet.sheet1, sheet.url
+    if sheet_url:
+        try:
+            sheet = gc.open_by_url(sheet_url)
+            return sheet.sheet1, sheet.url
+        except Exception as e:
+            raise Exception(f"❌ Помилка при відкритті таблиці: {str(e)}")
+    else:
+        sheet_name = 'Nutritionist-user-data'  # Фіксована назва таблиці
+        try:
+            sheet = gc.open(sheet_name)
+        except gspread.exceptions.SpreadsheetNotFound:
+            sheet = gc.create(sheet_name)
+            sheet.share(None, perm_type='anyone', role='reader')
+        
+        return sheet.sheet1, sheet.url
 
-def export_users_to_sheet():
+def export_users_to_sheet(sheet_url=None):
     """Експортує всіх користувачів з Firestore в Google Sheets"""
-    sheet, sheet_url = get_sheet()
+    sheet, sheet_url = get_sheet(sheet_url)
     
     # Очищаємо таблицю, залишаючи заголовки
     sheet.clear()
@@ -31,9 +38,10 @@ def export_users_to_sheet():
     
     # Отримуємо всіх користувачів з Firestore
     users = db.users_collection.stream()
+    users_list = list(users)  # Конвертуємо в список для підрахунку
     
     # Додаємо дані користувачів
-    for user in users:
+    for user in users_list:
         user_data = user.to_dict()
         row = [
             user_data.get('user_id', ''),
@@ -45,4 +53,5 @@ def export_users_to_sheet():
         ]
         sheet.append_row(row)
     
-    return f"✅ Експортовано {sheet.row_count - 1} користувачів в Google Sheets\n\n🔗 Посилання на таблицю: {sheet_url}" 
+    total_users = len(users_list)
+    return f"✅ Експортовано {total_users} користувачів в Google Sheets\n\n🔗 Посилання на таблицю: {sheet_url}" 
