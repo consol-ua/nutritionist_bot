@@ -109,7 +109,7 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE, co
         await query.edit_message_text(text, parse_mode='Markdown', reply_markup=InlineKeyboardMarkup(keyboard))
         
     elif query.data == "export":
-        await export_users(query.message, context)
+        await export_users(update, context)
         
     elif query.data == "back_to_main":
         keyboard = [
@@ -176,7 +176,10 @@ async def contact_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def export_users(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Запитує посилання на таблицю для експорту"""
-    await update.message.reply_text("🔗 Будь ласка, надішліть посилання на Google Sheets таблицю, куди потрібно експортувати дані:")
+    if update.callback_query:
+        await update.callback_query.message.reply_text("🔗 Будь ласка, надішліть посилання на Google Sheets таблицю, куди потрібно експортувати дані:")
+    else:
+        await update.message.reply_text("🔗 Будь ласка, надішліть посилання на Google Sheets таблицю, куди потрібно експортувати дані:")
     return WAITING_FOR_SHEET_URL
 
 async def handle_sheet_url(update: Update, context: ContextTypes.DEFAULT_TYPE):
