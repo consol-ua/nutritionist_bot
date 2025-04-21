@@ -2,6 +2,7 @@ from google.cloud import firestore
 from datetime import datetime
 from typing import Optional, Dict, Any
 import google.auth
+import os
 
 class FirestoreDB:
     def __init__(self):
@@ -12,9 +13,17 @@ class FirestoreDB:
         клієнтська бібліотека автоматично використовує ідентифікацію сервісу.
         Якщо код виконується локально, потрібно налаштувати GOOGLE_APPLICATION_CREDENTIALS.
         """
+        # Встановлюємо змінну середовища для credentials тільки при локальному запуску
+        # В Cloud Run це не потрібно, оскільки використовується ідентифікація сервісу
+        if not os.getenv('K_SERVICE') and 'GOOGLE_APPLICATION_CREDENTIALS_DB' in os.environ:
+            os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = os.environ['GOOGLE_APPLICATION_CREDENTIALS_DB']
+        
         credentials, _ = google.auth.default()
 
-        self.db = firestore.Client(credentials)
+        self.db = firestore.Client(
+            project=os.getenv('GOOGLE_CLOUD_PROJECT'),
+            credentials=credentials
+        )
         self.users_collection = self.db.collection('users')
     
     def user_exists(self, user_id: int) -> bool:
