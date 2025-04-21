@@ -17,7 +17,7 @@ WAITING_FOR_SHEET_URL = 1
 VIDEO_FILE_ID = os.getenv('VIDEO_FILE_ID')
 
 async def showWelcomeMessage(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    welcome_message = "👋 Привіт! Це бот для ведення дієти та харчування"
+    welcome_message = "👋 Це бот для ведення дієти та харчування"
     
     await update.message.reply_text(welcome_message)
     
@@ -164,9 +164,13 @@ async def contact_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 'created_at': datetime.now()
             }
             db.add_user(user_data)
-            await showWelcomeMessage(update, context) 
+                        
+            # Видаляємо клавіатуру після успішного додавання
+            await update.message.reply_text("✅ Реєстрація успішна!", reply_markup=ReplyKeyboardRemove())
+
+            await showWelcomeMessage(update, context)
         else:
-            await update.message.reply_text("Ти вже зареєстрований 😊", reply_markup=ReplyKeyboardRemove()) #Прибираємо клавіатуру
+            await update.message.reply_text("Ти вже зареєстрований 😊", reply_markup=ReplyKeyboardRemove())
     else:
         await update.message.reply_text("⚠️ Можна надсилати тільки свій контакт.")
 
