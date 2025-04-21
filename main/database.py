@@ -13,9 +13,6 @@ class FirestoreDB:
         """
         self.db = firestore.Client()  # Клієнтська бібліотека обробляє аутентифікацію
         self.users_collection = self.db.collection('users')
-        self.sessions_collection = self.db.collection('sessions')
-        self.meals_collection = self.db.collection('meals')
-        self.nutrition_plans_collection = self.db.collection('nutrition_plans')
     
     def user_exists(self, user_id: int) -> bool:
         """Перевіряє чи існує користувач в базі даних"""
@@ -44,21 +41,6 @@ class FirestoreDB:
             user_id (int): Telegram ID користувача
         """
         self.users_collection.document(str(user_id)).delete()
-
-    def add_session(self, session_data: Dict[str, Any]) -> None:
-        """Додає нову сесію"""
-        session_data['created_at'] = datetime.now()
-        self.sessions_collection.add(session_data)
-
-    def add_meal(self, meal_data: Dict[str, Any]) -> None:
-        """Додає новий прийом їжі"""
-        meal_data['created_at'] = datetime.now()
-        self.meals_collection.add(meal_data)
-
-    def add_nutrition_plan(self, plan_data: Dict[str, Any]) -> None:
-        """Додає новий план харчування"""
-        plan_data['created_at'] = datetime.now()
-        self.nutrition_plans_collection.add(plan_data)
 
 # Створюємо глобальний екземпляр бази даних
 db = FirestoreDB()
