@@ -16,11 +16,11 @@ def get_sheet():
         sheet = gc.create(sheet_name)
         sheet.share(None, perm_type='anyone', role='reader')
     
-    return sheet.sheet1
+    return sheet.sheet1, sheet.url
 
 def export_users_to_sheet():
     """Експортує всіх користувачів з Firestore в Google Sheets"""
-    sheet = get_sheet()
+    sheet, sheet_url = get_sheet()
     
     # Очищаємо таблицю, залишаючи заголовки
     sheet.clear()
@@ -45,4 +45,4 @@ def export_users_to_sheet():
         ]
         sheet.append_row(row)
     
-    return f"✅ Експортовано {sheet.row_count - 1} користувачів в Google Sheets" 
+    return f"✅ Експортовано {sheet.row_count - 1} користувачів в Google Sheets\n\n🔗 Посилання на таблицю: {sheet_url}" 
