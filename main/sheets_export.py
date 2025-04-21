@@ -1,24 +1,16 @@
 import gspread
 from google.oauth2 import service_account
 import os
-from dotenv import load_dotenv
 from database import db
-
-load_dotenv()
 
 def get_sheet():
     """Підключається до Google Sheets та повертає об'єкт таблиці"""
-    credentials_path = os.getenv('GOOGLE_APPLICATION_CREDENTIALS')
-    if not credentials_path:
-        raise ValueError("GOOGLE_APPLICATION_CREDENTIALS не встановлено в .env файлі")
-    
-    credentials = service_account.Credentials.from_service_account_file(
-        credentials_path,
-        scopes=['https://www.googleapis.com/auth/spreadsheets']
-    )
+    # Використовуємо вбудовані облікові дані Google Cloud Run
+    credentials = service_account.Credentials.get_application_default()
+    credentials = credentials.with_scopes(['https://www.googleapis.com/auth/spreadsheets'])
     
     gc = gspread.authorize(credentials)
-    sheet_name = os.getenv('GOOGLE_SHEET_NAME', 'Nutritionist-user-data')
+    sheet_name = 'Nutritionist-user-data'  # Фіксована назва таблиці
     
     try:
         sheet = gc.open(sheet_name)
@@ -36,7 +28,7 @@ def export_users_to_sheet():
     sheet.clear()
     
     # Додаємо заголовки
-    headers = ['ID', 'Ім\'я', 'Прізвище', 'Username', 'Телефон', 'Дата реєстрації']
+    headers = ['ID', 'First Name', 'Last Name', 'Username', 'Phone', 'Registration Date']
     sheet.append_row(headers)
     
     # Отримуємо всіх користувачів з Firestore
