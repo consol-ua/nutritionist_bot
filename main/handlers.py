@@ -2,10 +2,11 @@
 from telegram import Update, KeyboardButton, ReplyKeyboardMarkup, ReplyKeyboardRemove
 from telegram.ext import ContextTypes
 from datetime import datetime
-from utils import get_sheet, user_exists
+from .database import db
+from .sheets_export import export_users_to_sheet
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    welcome_message = "Привіт! Це базовий бот який вносить данні в google sheet"
+    welcome_message = "Привіт! Це бот для ведення дієти та харчування"
     
     await update.message.reply_text(welcome_message)
 
@@ -15,9 +16,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
     user = update.effective_user
 
-    sheet = get_sheet()
-
-    if user_exists(sheet, user.id):
+    if db.user_exists(user.id):
         await update.message.reply_text("👋 Ти вже в системі 😊", reply_markup=ReplyKeyboardRemove()) #Прибираємо клавіатуру
     else:
         # Кнопка для надсилання номера телефону
@@ -38,20 +37,27 @@ async def contact_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if contact and contact.user_id == user.id:
         phone = contact.phone_number
-        sheet = get_sheet()
-
-        if not user_exists(sheet, user.id):
-            row = [
-                user.first_name or "",
-                user.last_name or "",
-                f"@{user.username}" if user.username else "",
-                user.id,
-                phone,
-                datetime.now().strftime("%Y-%m-%d")
-            ]
-            sheet.append_row(row)
+        
+        if not db.user_exists(user.id):
+            user_data = {
+                'user_id': user.id,
+                'first_name': user.first_name or "",
+                'last_name': user.last_name or "",
+                'username': f"@{user.username}" if user.username else "",
+                'phone': phone,
+                'created_at': datetime.now()
+            }
+            db.add_user(user_data)
             await update.message.reply_text(f"🎉 Вітаємо, {user.first_name}! Тебе успішно додано до системи.", reply_markup=ReplyKeyboardRemove()) #Прибираємо клавіатуру після обробки та вітаємо
         else:
             await update.message.reply_text("Ти вже зареєстрований 😊", reply_markup=ReplyKeyboardRemove()) #Прибираємо клавіатуру
     else:
         await update.message.reply_text("⚠️ Можна надсилати тільки свій контакт.")
+
+async def export_users(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Експортує користувачів в Google Sheets"""
+    try:
+        result = export_users_to_sheet()
+        await update.message.reply_text(result)
+    except Exception as e:
+        await update.message.reply_text(f"❌ Помилка при експорті: {str(e)}")
