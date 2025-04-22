@@ -127,6 +127,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
 
     if db.user_exists(user.id):
+        await showWelcomeMessage(update, context)
         # Створюємо головне меню
         keyboard = [
             [KeyboardButton("👤 Особистий кабінет")],

@@ -2,16 +2,16 @@ FROM python:3.9-slim
 
 WORKDIR /app
 
+# Встановлюємо залежності
 COPY requirements.txt .
-RUN pip install -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
-COPY main/ .  
+# Копіюємо код
+COPY main/ .
 
-# Змінні середовища для локального запуску
-# В Cloud Run ці змінні будуть перевизначені або не потрібні
-ENV BOT_TOKEN=${BOT_TOKEN}
-ENV GOOGLE_SHEET_NAME=${SHEET_NAME}
-ENV WEBHOOK_URL=${WEBHOOK_URL}
-ENV PORT 8080
+# Налаштування для production
+ENV PYTHONUNBUFFERED=1
+ENV PORT=8080
 
-CMD ["python", "main.py"]
+# Запускаємо через gunicorn для кращої продуктивності
+CMD exec gunicorn --bind :$PORT --workers 1 --threads 8 --timeout 0 main:app

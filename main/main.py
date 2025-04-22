@@ -1,5 +1,6 @@
 import os
 import asyncio
+import logging
 from dotenv import load_dotenv
 from telegram import Update, BotCommand, BotCommandScopeDefault
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, ConversationHandler, CallbackQueryHandler
@@ -7,6 +8,13 @@ from handlers import start, contact_handler, export_users, handle_sheet_url, WAI
 from flask import Flask, request, jsonify
 import threading
 from database import db
+
+# Налаштування логування
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
 
 # Завантажуємо змінні середовища
 load_dotenv()
@@ -56,48 +64,53 @@ application.add_handler(MessageHandler(filters.CONTACT, contact_handler))
 # Додаємо обробник текстових повідомлень (має бути останнім)
 application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_text_message))
 
-# Обробка Telegram-оновлень
-async def process_update(update):
-    print(f"▶️ В process_update()")
-    await application.process_update(update)
-    print("✅ Завершено process_update()")
-
-# Event loop для стабільного async виконання в Cloud Run
+# Створюємо глобальний event loop
 loop = asyncio.new_event_loop()
 asyncio.set_event_loop(loop)
 
+# Ініціалізуємо бота
+loop.run_until_complete(application.initialize())
+loop.run_until_complete(setup_commands())
+
+# Функція для запуску event loop в окремому потоці
+def run_event_loop():
+    asyncio.set_event_loop(loop)
+    loop.run_forever()
+
+# Запускаємо event loop в окремому потоці
+threading.Thread(target=run_event_loop, daemon=True).start()
+
+# Обробка Telegram-оновлень
+async def process_update(update):
+    logger.info(f"▶️ В process_update()")
+    await application.process_update(update)
+    logger.info("✅ Завершено process_update()")
+
 def process_update_in_thread(update):
     """Обробка оновлення в окремому потоці."""
-    loop.run_until_complete(process_update(update))
+    asyncio.run_coroutine_threadsafe(process_update(update), loop)
 
 @app.route(WEBHOOK_PATH, methods=['POST'])
 def webhook():
     """Отримує оновлення від Telegram через вебхук."""
     try:
         data = request.get_json()
-        print(f"Отримано оновлення: {data}")
+        logger.info(f"Отримано оновлення: {data}")
         update = Update.de_json(data, application.bot)
 
         # Обробка в окремому потоці
         threading.Thread(target=process_update_in_thread, args=(update,)).start()
 
     except Exception as e:
-        print(f"Помилка обробки вебхука: {e}")
+        logger.error(f"Помилка обробки вебхука: {e}")
         return jsonify({"status": "error"}), 500
 
     return jsonify({"status": "ok"})
 
-@app.route("/ping", methods=["GET"])
+@app.route("/ping", methods=['GET'])
 def ping():
     return "pong", 200
 
-# Локальний запуск або запуск у Cloud Run
+# Flask запускається на всіх інтерфейсах
 if __name__ == "__main__":
-    # Ініціалізуємо Telegram Application
-    loop.run_until_complete(application.initialize())
-    
-    # Налаштовуємо команди меню
-    loop.run_until_complete(setup_commands())
-
-    # Flask запускається на всіх інтерфейсах
     app.run(host="0.0.0.0", port=PORT)

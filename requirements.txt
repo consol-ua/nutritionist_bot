@@ -6,3 +6,4 @@ google-api-python-client==2.121.0
 python-dotenv==1.0.1  # Залежність для локального запуску
 flask==3.0.2
 google-cloud-firestore==2.14.0  # Залежність для роботи з Firestore
+gunicorn==21.2.0

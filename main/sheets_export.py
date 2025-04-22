@@ -1,10 +1,18 @@
 import gspread
 from database import db
 import google.auth
+import os
+
 
 def get_sheet(sheet_url=None):
     """Підключається до Google Sheets та повертає об'єкт таблиці"""
     # Використовуємо вбудовані облікові дані Google Cloud Run
+    
+        # Встановлюємо змінну середовища для credentials тільки при локальному запуску
+        # В Cloud Run це не потрібно, оскільки використовується ідентифікація сервісу
+    if not os.getenv('K_SERVICE') and 'GOOGLE_APPLICATION_CREDENTIALS_DB' in os.environ:
+        os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = os.environ['GOOGLE_APPLICATION_CREDENTIALS_DB']
+
     credentials, _ = google.auth.default()
     
     gc = gspread.authorize(credentials)
