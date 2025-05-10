@@ -47,3 +47,32 @@ Run.
 python3 main/main.py
 
 ngrok http 8080
+
+# Підключення до інстансу
+
+gcloud compute ssh telegram-bot-vm --zone=europe-west1-b
+
+як оновити файли проекта в інстансі?
+
+Ось як оновити файли проекту в інстансі:
+
+1. З вашого локального комп'ютера скопіюйте всі файли: gcloud compute scp
+   gcloud compute scp --recurse ./* telegram-bot-vm:~/app/ --zone=europe-west1-b
+
+2. Підключіться до інстансу: gcloud compute ssh telegram-bot-vm
+   gcloud compute ssh telegram-bot-vm --zone=europe-west1-b
+
+3. Перейдіть до директорії проекту: cd ~/app
+
+4. Перезапустіть контейнер: docker stop nutritionist-bot docker rm
+    docker stop nutritionist-bot
+    docker rm nutritionist-bot
+    docker build -t nutritionist-bot .
+    docker run -d \
+      --name nutritionist-bot \
+      --env-file .env \
+      -p 8080:8080 \
+      -v ~/app/credentials:/app/credentials \
+      nutritionist-bot
+
+5. Перевірте логи: docker logs nutritionist-bot
