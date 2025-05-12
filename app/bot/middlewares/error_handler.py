@@ -16,14 +16,14 @@ class ErrorHandlerMiddleware(BaseMiddleware):
         try:
             return await handler(event, data)
         except BotException as e:
-            logger.error(f"Помилка бота: {str(e)}")
+            logger.error(f"Error: {str(e)}")
             if isinstance(event, Message):
-                await event.answer("Виникла помилка. Спробуйте пізніше.")
+                await event.answer("Error. Try again later.")
             elif isinstance(event, CallbackQuery):
-                await event.answer("Виникла помилка. Спробуйте пізніше.", show_alert=True)
+                await event.answer("Error. Try again later.", show_alert=True)
         except Exception as e:
-            logger.exception(f"Неочікувана помилка: {str(e)}")
+            logger.exception(f"Unexpected error: {str(e)}")
             if isinstance(event, Message):
-                await event.answer("Виникла неочікувана помилка. Спробуйте пізніше.")
+                await event.answer("Unexpected error. Try again later.")
             elif isinstance(event, CallbackQuery):
-                await event.answer("Виникла неочікувана помилка. Спробуйте пізніше.", show_alert=True) 
+                await event.answer("Unexpected error. Try again later.", show_alert=True) 

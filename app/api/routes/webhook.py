@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 async def webhook(request: Request):
     try:
         update_dict = await request.json()
-        logger.info(f"отримано вебхук: {update_dict}")
+        logger.info(f"received webhook: {update_dict}")
         
         # Конвертуємо словник в об'єкт Update
         update = Update.model_validate(update_dict)
@@ -20,7 +20,8 @@ async def webhook(request: Request):
         
         return {"status": "ok"}
     except Exception as e:
-        logger.error(f"Помилка обробки вебхука: {str(e)}", exc_info=True)
+        logger.error(f"Error processing webhook: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
 
 
+ 

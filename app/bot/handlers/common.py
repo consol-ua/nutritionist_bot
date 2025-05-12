@@ -32,8 +32,8 @@ async def handle_file(message: types.Message):
     
     if file_id:
         await message.answer(
-            f"✅ Файл отримано!\n"
-            f"Тип: {file_type}\n"
+            f"✅ File received!\n"
+            f"Type: {file_type}\n"
             f"File ID: {file_id}"
         )
-        logger.info(f"Користувач {message.from_user.id} надіслав файл типу {file_type} з ID: {file_id}") 
+        logger.info(f"User {message.from_user.id} sent a file of type {file_type} with ID: {file_id}") 

@@ -1,5 +1,6 @@
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
+from apscheduler.triggers.date import DateTrigger
 from ..core.exceptions import SchedulerError
 import logging
 
@@ -13,32 +14,32 @@ class Scheduler:
     def start(self):
         try:
             self.scheduler.start()
-            logger.info("Планувальник завдань запущено")
+            logger.info("Scheduler started")
         except Exception as e:
-            raise SchedulerError(f"Помилка запуску планувальника: {str(e)}")
+            raise SchedulerError(f"Error starting scheduler: {str(e)}")
 
-    def add_job(self, job_id: str, func, trigger: str, **trigger_args):
+    def add_job(self, job_id: str, func, trigger, **trigger_args):
         try:
             job = self.scheduler.add_job(
                 func,
-                trigger=CronTrigger.from_crontab(trigger),
+                trigger=trigger,
                 id=job_id,
                 **trigger_args
             )
             self.jobs[job_id] = job
-            logger.info(f"Додано завдання {job_id}")
+            logger.info(f"Added job {job_id}")
             return job
         except Exception as e:
-            raise SchedulerError(f"Помилка додавання завдання: {str(e)}")
+            raise SchedulerError(f"Error adding job: {str(e)}")
 
     def remove_job(self, job_id: str):
         try:
             if job_id in self.jobs:
                 self.scheduler.remove_job(job_id)
                 del self.jobs[job_id]
-                logger.info(f"Видалено завдання {job_id}")
+                logger.info(f"Removed job {job_id}")
         except Exception as e:
-            raise SchedulerError(f"Помилка видалення завдання: {str(e)}")
+            raise SchedulerError(f"Error removing job: {str(e)}")
 
     def get_job(self, job_id: str):
         return self.jobs.get(job_id)

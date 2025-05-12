@@ -10,7 +10,8 @@ from app.bot.templates.responses import (
     send_welcome_message,
     send_registration_request,
     send_error_message,
-    send_database_error
+    send_database_error,
+    survey_message
 )
 from google.cloud import firestore
 import logging
@@ -32,13 +33,14 @@ async def cmd_start(message: Message, state: FSMContext):
         if user_data and user_data.get('phone'):
             await send_welcome_video(message)
             await send_welcome_message(message)
+            await survey_message(message)
             return
             
         await send_registration_request(message)
         await state.set_state(UserRegistration.waiting_for_phone)
         
     except DatabaseError as e:
-        logger.error(f"Помилка при перевірці користувача: {e}")
+        logger.error(f"Error checking user: {e}")
         await send_error_message(message)
 
 @router.message(UserRegistration.waiting_for_phone, F.contact)
@@ -65,6 +67,7 @@ async def process_phone(message: Message, state: FSMContext):
         await firestore_client.save_user(message.from_user.id, user_data)
         await send_welcome_video(message)
         await send_welcome_message(message)
+        await survey_message(message)
         await state.clear()
         
     except DatabaseError as e:

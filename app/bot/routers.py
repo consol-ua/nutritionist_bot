@@ -1,13 +1,14 @@
 from aiogram import Router
-from .handlers.common import router as common_router
-from app.bot.handlers.start import router as start_router
+from app.bot.handlers import start, common, survey, payment
 
 # Створюємо головний роутер
 main_router = Router()
 
-# Підключаємо всі роутери
-main_router.include_router(common_router)
-main_router.include_router(start_router)
+# Включаємо роутери
+main_router.include_router(start.router)
+main_router.include_router(common.router)
+main_router.include_router(survey.router)
+main_router.include_router(payment.router)
 
 def setup_routers() -> Router:
     """Налаштування всіх роутерів бота"""

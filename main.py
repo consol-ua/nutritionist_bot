@@ -16,10 +16,9 @@ settings = get_settings()
 
 async def setup_webhook():
     """Встановлення вебхука для бота"""
-    print(f"settings.WEBHOOK_URL: {settings.WEBHOOK_URL}")
     webhook_url = f"{settings.WEBHOOK_URL}/webhook"
     await bot.set_webhook(url=webhook_url)
-    logger.info(f"Вебхук встановлено: {webhook_url}")
+    logger.info(f"Webhook set: {webhook_url}")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -27,12 +26,12 @@ async def lifespan(app: FastAPI):
     await setup_webhook()
     # Запуск планувальника
     scheduler.start()
-    logger.info("Додаток запущено")
+    logger.info("App started")
     yield
     # Зупинка бота
     await bot.delete_webhook()
     await bot.session.close()
-    logger.info("Додаток зупинено")
+    logger.info("App stopped")
 
 # Ініціалізація FastAPI
 app = FastAPI(title="Telegram Bot API", lifespan=lifespan)

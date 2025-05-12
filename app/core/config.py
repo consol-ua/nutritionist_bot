@@ -30,6 +30,7 @@ class Settings(BaseSettings):
 
     # Content
     START_VIDEO_FILE_ID:str
+    HYPOTHYROIDISM_VIDEO_FILE_ID:str
 
     class Config:
         env_file = ".env"

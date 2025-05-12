@@ -23,15 +23,15 @@ class FirestoreClient:
                 project=settings.PROJECT_ID,
                 credentials=credentials
             )
-            logger.info("Firestore клієнт ініціалізовано для development середовища")
+            logger.info("Firestore client initialized for development environment")
             
         elif settings.ENVIRONMENT == "production":
             # В продакшені використовуємо Workload Identity
             self.client = firestore.Client(project=settings.PROJECT_ID)
-            logger.info("Firestore клієнт ініціалізовано для production середовища")
+            logger.info("Firestore client initialized for production environment")
             
         else:
-            raise DatabaseError(f"Невідоме середовище: {settings.ENVIRONMENT}")
+            raise DatabaseError(f"Unknown environment: {settings.ENVIRONMENT}")
         
         # Ініціалізуємо колекції
         self.users_collection = self.client.collection('users')
@@ -41,7 +41,7 @@ class FirestoreClient:
             doc = self.users_collection.document(str(user_id)).get()
             return doc.to_dict() if doc.exists else None
         except Exception as e:
-            raise DatabaseError(f"Помилка отримання даних користувача: {str(e)}")
+            raise DatabaseError(f"Error getting user data: {str(e)}")
 
     async def user_exists(self, user_id: int) -> bool:
         """Перевіряє чи існує користувач в базі даних"""
@@ -49,19 +49,31 @@ class FirestoreClient:
             doc = self.users_collection.document(str(user_id)).get()
             return doc.exists
         except Exception as e:
-            raise DatabaseError(f"Помилка перевірки існування користувача: {str(e)}")
+            raise DatabaseError(f"Error checking user existence: {str(e)}")
 
     async def save_user(self, user_id: int, data: dict):
         try:
             self.users_collection.document(str(user_id)).set(data)
         except Exception as e:
-            raise DatabaseError(f"Помилка збереження даних користувача: {str(e)}")
+            raise DatabaseError(f"Error saving user data: {str(e)}")
 
     async def delete_user(self, user_id: int):
         try:
             self.users_collection.document(str(user_id)).delete()
         except Exception as e:
-            raise DatabaseError(f"Помилка видалення даних користувача: {str(e)}")
+            raise DatabaseError(f"Error deleting user data: {str(e)}")
+
+    async def save_job_id(self, user_id: int, job_id: str):
+        """Зберігає job_id для користувача"""
+        try:
+            user_ref = self.users_collection.document(str(user_id))
+            user_ref.update({
+                'job_id': job_id,
+                'updated_at': firestore.SERVER_TIMESTAMP
+            })
+            logger.info(f"Saved job_id {job_id} for user {user_id}")
+        except Exception as e:
+            raise DatabaseError(f"Error saving job_id: {str(e)}")
 
 # Створення глобального екземпляру клієнта
 firestore_client = FirestoreClient() 
