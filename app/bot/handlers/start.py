@@ -5,7 +5,13 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from app.db.firestore import firestore_client
 from app.core.exceptions import DatabaseError
-from app.bot.keyboards.phone import get_phone_keyboard, remove_keyboard
+from app.bot.templates.responses import (
+    send_welcome_video,
+    send_welcome_message,
+    send_registration_request,
+    send_error_message,
+    send_database_error
+)
 from google.cloud import firestore
 import logging
 
@@ -15,6 +21,7 @@ router = Router()
 class UserRegistration(StatesGroup):
     waiting_for_phone = State()
 
+
 @router.message(Command("start"))
 async def cmd_start(message: Message, state: FSMContext):
     """Обробка команди /start"""
@@ -23,32 +30,22 @@ async def cmd_start(message: Message, state: FSMContext):
         user_data = await firestore_client.get_user(message.from_user.id)
         
         if user_data and user_data.get('phone'):
-            await message.answer(
-                "Вітаю! Ви вже зареєстровані в системі.\n"
-                f"Ваш номер телефону: {user_data['phone']}"
-            )
+            await send_welcome_video(message)
+            await send_welcome_message(message)
             return
             
-        await message.answer(
-            "Вітаю! Для реєстрації, будь ласка, натисніть кнопку нижче щоб надіслати свій номер телефону.",
-            reply_markup=get_phone_keyboard()
-        )
+        await send_registration_request(message)
         await state.set_state(UserRegistration.waiting_for_phone)
         
     except DatabaseError as e:
         logger.error(f"Помилка при перевірці користувача: {e}")
-        await message.answer(
-            "❌ Виникла помилка. Спробуйте пізніше."
-        )
+        await send_error_message(message)
 
 @router.message(UserRegistration.waiting_for_phone, F.contact)
 async def process_phone(message: Message, state: FSMContext):
     """Обробка отриманого номера телефону"""
     if not message.contact:
-        await message.answer(
-            "❌ Будь ласка, натисніть кнопку для надсилання номера телефону.",
-            reply_markup=get_phone_keyboard()
-        )
+        await send_registration_request(message)
         return
     
     phone = message.contact.phone_number
@@ -66,17 +63,10 @@ async def process_phone(message: Message, state: FSMContext):
         }
         
         await firestore_client.save_user(message.from_user.id, user_data)
-        
-        await message.answer(
-            "✅ Дякую! Ваш номер телефону успішно збережено.\n"
-            "Тепер ви можете користуватися ботом.",
-            reply_markup=remove_keyboard()
-        )
+        await send_welcome_video(message)
+        await send_welcome_message(message)
         await state.clear()
         
     except DatabaseError as e:
         logger.error(f"Помилка при збереженні даних: {e}")
-        await message.answer(
-            "❌ Виникла помилка при збереженні даних. Спробуйте пізніше.",
-            reply_markup=remove_keyboard()
-        ) 
+        await send_database_error(message) 

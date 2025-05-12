@@ -1,21 +1,39 @@
-from aiogram import Router, types
+from aiogram import Router, types, F
 from aiogram.filters import Command
 import logging
 
 logger = logging.getLogger(__name__)
 router = Router()
 
-@router.message(Command("start"))
-async def cmd_start(message: types.Message):
-    """Обробник команди /start"""
-    user_name = message.from_user.full_name
-    await message.answer(
-        f"Привіт, {user_name}! 👋\n\n"
-        "Я бот-помічник для відстеження харчування. "
-        "Я допоможу вам вести облік ваших прийомів їжі та аналізувати ваш раціон.\n\n"
-        "Використовуйте команди:\n"
-        "/help - показати список команд\n"
-        "/add_meal - додати прийом їжі\n"
-        "/stats - подивитися статистику"
-    )
-    logger.info(f"Користувач {user_name} (ID: {message.from_user.id}) запустив бота") 
+@router.message(F.document | F.photo | F.video | F.audio | F.voice | F.video_note)
+async def handle_file(message: types.Message):
+    """Обробник для файлів різних типів"""
+    file_id = None
+    file_type = None
+    
+    if message.document:
+        file_id = message.document.file_id
+        file_type = "document"
+    elif message.photo:
+        file_id = message.photo[-1].file_id  # Беремо найбільше фото
+        file_type = "photo"
+    elif message.video:
+        file_id = message.video.file_id
+        file_type = "video"
+    elif message.audio:
+        file_id = message.audio.file_id
+        file_type = "audio"
+    elif message.voice:
+        file_id = message.voice.file_id
+        file_type = "voice"
+    elif message.video_note:
+        file_id = message.video_note.file_id
+        file_type = "video_note"
+    
+    if file_id:
+        await message.answer(
+            f"✅ Файл отримано!\n"
+            f"Тип: {file_type}\n"
+            f"File ID: {file_id}"
+        )
+        logger.info(f"Користувач {message.from_user.id} надіслав файл типу {file_type} з ID: {file_id}") 

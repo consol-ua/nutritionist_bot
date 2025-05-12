@@ -28,6 +28,9 @@ class Settings(BaseSettings):
     # Ngrok
     NGROK_AUTH_TOKEN: Optional[str] = None
 
+    # Content
+    START_VIDEO_FILE_ID:str
+
     class Config:
         env_file = ".env"
         env_file_encoding = 'utf-8'

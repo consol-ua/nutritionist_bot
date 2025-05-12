@@ -6,7 +6,7 @@ from app.bot.handlers.start import router as start_router
 main_router = Router()
 
 # Підключаємо всі роутери
-# main_router.include_router(common_router)
+main_router.include_router(common_router)
 main_router.include_router(start_router)
 
 def setup_routers() -> Router:
