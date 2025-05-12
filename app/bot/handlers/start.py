@@ -34,6 +34,7 @@ async def cmd_start(message: Message, state: FSMContext):
             await send_welcome_video(message)
             await send_welcome_message(message)
             await survey_message(message)
+            
             return
             
         await send_registration_request(message)
@@ -68,8 +69,9 @@ async def process_phone(message: Message, state: FSMContext):
         await send_welcome_video(message)
         await send_welcome_message(message)
         await survey_message(message)
+
         await state.clear()
         
     except DatabaseError as e:
-        logger.error(f"Помилка при збереженні даних: {e}")
+        logger.error(f"Error saving user data: {e}")
         await send_database_error(message) 

@@ -3,7 +3,7 @@ from aiogram.enums import ParseMode
 from app.core.config import get_settings
 from app.bot.middlewares.error_handler import ErrorHandlerMiddleware
 from app.bot.routers import main_router
-
+from app.bot.keyboards.commands import set_commands
 settings = get_settings()
 
 # Ініціалізація бота
@@ -22,7 +22,7 @@ def create_dispatcher() -> Dispatcher:
     
     # Включаємо головний роутер
     dp.include_router(main_router)
-    
+
     return dp
 
 # Створюємо диспетчер

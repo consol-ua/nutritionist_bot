@@ -164,18 +164,25 @@ docker-compose -f docker/docker-compose.yml down
 docker-compose -f docker/docker-compose.yml up --build
 ```
 
-## Розгортання на Google Compute Engine
+############################ Розгортання на Google Compute Engine
 
-1. Налаштуйте Google Cloud SDK
-2. Створіть інстанс на GCE
-3. Налаштуйте Docker на інстансі
+1. Gідключаємося до GCE
+
+```bash
+gcloud compute ssh instance-20250512-170304 --zone=europe-west1-b
+```
+
+3. Переносимо файли
+
+```bash
+gcloud compute scp --recurse app docker .env main.py requirements.txt instance-20250512-170304:~/bot/ --zone=europe-west1-b
+```
+
 4. Запустіть контейнер:
 
 ```bash
-docker-compose -f docker/docker-compose.yml up -d
+docker-compose -f docker/docker-compose.yml --env-file .env up -d
 ```
-
-## Вирішення проблем
 
 ### Docker не запускається
 

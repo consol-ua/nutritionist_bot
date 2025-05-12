@@ -7,6 +7,7 @@ from app.core.logging import setup_logging
 from app.core.bot import bot, dp
 from app.api.routes.webhook import router as webhook_router
 from app.services.scheduler import scheduler
+from app.bot.keyboards.commands import set_commands
 
 # Налаштування логування
 logger = setup_logging()
@@ -24,6 +25,8 @@ async def setup_webhook():
 async def lifespan(app: FastAPI):
     # Встановлення вебхука
     await setup_webhook()
+    # Встановлення команд бота
+    await set_commands(bot)
     # Запуск планувальника
     scheduler.start()
     logger.info("App started")

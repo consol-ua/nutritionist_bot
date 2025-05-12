@@ -14,7 +14,7 @@ async def send_hypothyroidism_video(message: Message):
     """Відправляє відео про гіпотиреоз та кнопку оплати"""
     # Відправляємо відео
     await message.answer_video(
-        video=settings.START_VIDEO_FILE_ID
+        video=settings.HYPOTHYROIDISM_VIDEO_FILE_ID
     )
     
     # Відправляємо повідомлення з кнопкою
@@ -81,6 +81,23 @@ async def send_instagram_invite(message: Message):
     await message.answer(
         "🎉 Вітаю! Схоже, все добре, але щоб на 100% у цьому впевнитися 👌🏻, у мене для тебе є гарна пропозиція 💌\n"
         "✍🏻 Напиши мені в дірект слово bot 🤖 — і отримай безкоштовну діагностичну консультацію 🩺✨",
+        reply_markup=keyboard,
+        parse_mode="Markdown"
+    )
+
+async def send_only_instagram_invite(message: Message):
+    """Відправляє повідомлення з кнопкою для переходу в Instagram"""
+    keyboard = InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(
+                text="📲 Перейти в Instagram ✨",
+                url="https://www.instagram.com/nutritionist_svitlana_marchyk"
+            )]
+        ]
+    )
+    
+    await message.answer(
+        "Контакт для зв'язку:",
         reply_markup=keyboard,
         parse_mode="Markdown"
     )
