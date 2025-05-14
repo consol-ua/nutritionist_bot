@@ -1,37 +1,59 @@
 from aiogram import Router, F
-from aiogram.types import CallbackQuery, Message
+from aiogram.types import Message
 from app.bot.templates.responses import send_payment_link
-from app.services.scheduler import scheduler
-from app.db.firestore import firestore_client
-from apscheduler.triggers.date import DateTrigger
 import logging
-from datetime import datetime, timedelta
+from app.core.config import get_settings
+from app.core.bot_instance import get_bot
 
 logger = logging.getLogger(__name__)
 router = Router()
+settings = get_settings()
 
-async def send_thank_you_message(message: Message):
-    """Відправляє повідомлення подяки"""
-    await message.answer("Дякую за оплату! 🎉")
+async def send_payment_reminder_message(chat_id: int):
+    """Відправка нагадування про оплату"""
+    try:
+        bot = get_bot()
+        message = await bot.send_message(
+            chat_id=chat_id,
+            text="Ви намагалися оплатити послугу, але оплату не було завершено. Спробуйте ще раз."
+        )
 
-@router.callback_query(F.data == "payment")
-async def process_payment(callback: CallbackQuery):
+        logger.info(f"send_payment_reminder_message user_id: {message.chat.id}")
+        logger.info(f"send_payment_reminder_message chat_id: {message.from_user.id}")
+
+        await send_payment_link(message.chat.id, message.from_user.id)
+    except Exception as e:
+        logger.error(f"Помилка при відправці нагадування: {str(e)}")
+
+async def process_payment(chat_id: int):
+    """Відправка нагадування про оплату"""
+    try:
+        bot = get_bot()
+        message = await bot.send_message(
+            chat_id=chat_id,
+            text="Дякую за оплату!"
+        )
+        await message.answer("Тепер ви маєте доступ до наступного відео.")
+
+        await message.answer_video(
+            video=settings.HYPOTHYROIDISM_VIDEO_FILE_ID,
+            caption="Ось ваше наступне відео про гіпотиреоз. Насолоджуйтесь!"
+        )
+    except Exception as e:
+        logger.error(f"Помилка при відправці відео після оплати: {str(e)}")
+
+@router.message(F.text == "Оплата")
+async def hard_payment(message: Message):
     """Обробка натискання на кнопку оплати"""
+    try:
+        logger.info(f"hard_payment user_id: {message.from_user.id}")
+        logger.info(f"phard_payment chat_id: {message.chat.id}")
+        # Відправляємо нове повідомлення
+        await send_payment_link(message.from_user.id, message.chat.id)
 
-    await callback.message.edit_text("Очікуйте, ми відправляємо вам повідомлення про оплату...")
+    except Exception as e:
+        logger.error(f"Помилка при обробці платежу: {str(e)}")
+        await message.answer("Помилка при обробці платежу", show_alert=True)
 
-    # Створюємо унікальний ID для завдання
-    job_id = f"{callback.from_user.id}_{datetime.now().timestamp()}"
-    
-    # Додаємо відкладене повідомлення через 1 хвилину
-    scheduler.add_job(
-        job_id=job_id,
-        func=send_thank_you_message,
-        trigger=DateTrigger(run_date=datetime.now() + timedelta(minutes=1)),
-        args=[callback.message]
-    )
-    
-    # Зберігаємо job_id в базі даних
-    await firestore_client.save_job_id(callback.from_user.id, job_id)
-    
-    await callback.answer() 
+
+

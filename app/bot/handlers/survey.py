@@ -48,50 +48,60 @@ async def start_survey(callback: CallbackQuery, state: FSMContext):
 async def send_question(message: Message, question_index: int):
     """Відправляє питання з прогрес-баром"""
     progress_text = f"Прогрес: {question_index + 1}/{len(SURVEY_QUESTIONS)}"
+    new_text = f"{progress_text}\n\n{SURVEY_QUESTIONS[question_index]}"
     
-    await message.edit_text(
-        f"{progress_text}\n\n"
-        f"{SURVEY_QUESTIONS[question_index]}",
-        reply_markup=get_survey_keyboard()
-    )
+    try:
+        await message.edit_text(
+            new_text,
+            reply_markup=get_survey_keyboard()
+        )
+    except Exception as e:
+        logger.error(f"Error updating question: {str(e)}")
+        # Спробуємо відправити нове повідомлення якщо редагування не вдалося
+        await message.answer(
+            new_text,
+            reply_markup=get_survey_keyboard()
+        )
 
 @router.callback_query(SurveyStates.answering, F.data.in_(["answer_yes", "answer_no"]))
 async def process_answer(callback: CallbackQuery, state: FSMContext):
     """Обробка відповіді на питання"""
-    # Отримуємо поточний стан
-    data = await state.get_data()
-    current_question = data["current_question"]
-    answers = data["answers"]
-    
-    # Зберігаємо відповідь
-    answer = callback.data == "answer_yes"
-    answers.append(answer)
-    
-    # Перевіряємо чи це останнє питання
-    if current_question + 1 < len(SURVEY_QUESTIONS):
-        # Оновлюємо стан
+    try:
+        # Отримуємо поточний стан
+        data = await state.get_data()
+        current_question = data["current_question"]
+        answers = data["answers"]
+        
+        # Зберігаємо відповідь
+        answer = callback.data == "answer_yes"
+        answers.append(answer)
+        
+        # Оновлюємо стан асинхронно
         await state.update_data(
             current_question=current_question + 1,
             answers=answers
         )
-        # Відправляємо наступне питання
-        await send_question(callback.message, current_question + 1)
-    else:
-        # Завершуємо опитування
-        await callback.message.edit_text(
-            "Дякую! Ви пройшли опитування 📝💛"
-        )
-
-        # Перевіряємо чи є хоча б одна відповідь True
-        if any(answers):
-            # Відправляємо відео про гіпотиреоз
-            await send_hypothyroidism_video(callback.message)
-        else:
-            # Відправляємо повідомлення з Instagram
-            await send_instagram_invite(callback.message)
         
-        # Тут можна додати логіку обробки всіх відповідей
-        logger.info(f"User {callback.from_user.id} completed the survey. Answers: {answers}")
-        await state.clear()
-    
-    await callback.answer() 
+        # Перевіряємо чи це останнє питання
+        if current_question + 1 < len(SURVEY_QUESTIONS):
+            # Відправляємо наступне питання
+            await send_question(callback.message, current_question + 1)
+        else:
+            # Завершуємо опитування
+            await callback.message.edit_text(
+                "Дякую! Ви пройшли опитування 📝💛"
+            )
+
+            # Перевіряємо чи є хоча б одна відповідь True
+            if any(answers):
+                await send_hypothyroidism_video(callback.message)
+            else:
+                await send_instagram_invite(callback.message)
+            
+            logger.info(f"User {callback.from_user.id} completed the survey. Answers: {answers}")
+            await state.clear()
+        
+        await callback.answer()
+    except Exception as e:
+        logger.error(f"Error processing answer: {str(e)}")
+        await callback.answer("Виникла помилка. Спробуйте ще раз.", show_alert=True) 

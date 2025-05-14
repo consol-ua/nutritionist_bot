@@ -1,7 +1,10 @@
 from aiogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
 from app.core.config import get_settings
 from app.bot.keyboards.phone import get_phone_keyboard, remove_keyboard
+from app.bot.templates.send_payment_link import send_payment_link
+import logging
 
+logger = logging.getLogger(__name__)
 settings = get_settings()
 
 async def send_welcome_video(message: Message):
@@ -16,9 +19,12 @@ async def send_hypothyroidism_video(message: Message):
     await message.answer_video(
         video=settings.HYPOTHYROIDISM_VIDEO_FILE_ID
     )
+
+    logger.info(f"responses user_id: {message.chat.id}")
+    logger.info(f"responses chat_id: {message.from_user.id}")
     
     # Відправляємо повідомлення з кнопкою
-    await send_payment_link(message)
+    await send_payment_link(message.chat.id, message.from_user.id)
 
 async def send_welcome_message(message: Message):
     """Відправляє привітальне повідомлення з інформацією про нутриціолога"""
@@ -101,22 +107,6 @@ async def send_only_instagram_invite(message: Message):
         reply_markup=keyboard,
         parse_mode="Markdown"
     )
-
-async def send_payment_link(message: Message):
-    """Відправляє посилання на оплату"""
-    keyboard = InlineKeyboardMarkup(
-        inline_keyboard=[
-            [InlineKeyboardButton(
-                text="💳 Оплатити консультацію",
-                callback_data="payment"
-            )]
-        ]
-    )
-    
-    await message.answer(
-        "Щоб перейти до наступних відео, тисни оплатити:",
-        reply_markup=keyboard
-    ) 
 
 
 

@@ -7,6 +7,7 @@ from typing import Optional, Dict
 class Settings(BaseSettings):
     # Telegram Bot
     BOT_TOKEN: str
+    BOT_USERNAME: str
     WEBHOOK_URL: str
 
     # Google Cloud
@@ -31,6 +32,10 @@ class Settings(BaseSettings):
     # Content
     START_VIDEO_FILE_ID:str
     HYPOTHYROIDISM_VIDEO_FILE_ID:str
+
+    # Monobank
+    MONOBANK_API_TOKEN: str
+    MONOBANK_WEBHOOK_URL: str
 
     class Config:
         env_file = ".env"

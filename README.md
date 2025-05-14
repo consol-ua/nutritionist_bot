@@ -166,7 +166,7 @@ docker-compose -f docker/docker-compose.yml up --build
 
 ############################ Розгортання на Google Compute Engine
 
-1. Gідключаємося до GCE
+1. Підключаємося до GCE
 
 ```bash
 gcloud compute ssh instance-20250512-170304 --zone=europe-west1-b
