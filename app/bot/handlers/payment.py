@@ -37,7 +37,7 @@ async def process_payment(chat_id: int):
 
         await message.answer_video(
             video=settings.HYPOTHYROIDISM_VIDEO_FILE_ID,
-            caption="Ось ваше наступне відео про гіпотиреоз. Насолоджуйтесь!"
+            caption="Ось ваше наступне відео про гіпотиреоз."
         )
     except Exception as e:
         logger.error(f"Помилка при відправці відео після оплати: {str(e)}")
