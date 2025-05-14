@@ -18,10 +18,6 @@ async def set_commands(bot):
             BotCommand(
                 command="about",
                 description="ℹ️ Про мене"
-            ),
-            BotCommand(
-                command="menu",
-                description="📋 Показати меню"
             )
         ]
         

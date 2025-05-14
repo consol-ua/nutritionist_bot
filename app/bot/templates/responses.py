@@ -43,7 +43,7 @@ async def survey_message(message: Message):
     )
 
     await message.answer(
-        "Будь ласка, пройдіть коротке опитування для визначення поточного стану здоров'я:",
+        "Для визначення стану щітоподібної залози:",
         reply_markup=keyboard
     )
 
@@ -114,7 +114,7 @@ async def send_payment_link(message: Message):
     )
     
     await message.answer(
-        "Для отримання детальної консультації та плану лікування, натисніть кнопку нижче:",
+        "Щоб перейти до наступних відео, тисни оплатити:",
         reply_markup=keyboard
     ) 
 
