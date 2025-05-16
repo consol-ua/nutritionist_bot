@@ -18,9 +18,6 @@ async def send_payment_reminder_message(chat_id: int):
             text="Ви намагалися оплатити послугу, але оплату не було завершено. Спробуйте ще раз."
         )
 
-        logger.info(f"send_payment_reminder_message user_id: {message.chat.id}")
-        logger.info(f"send_payment_reminder_message chat_id: {message.from_user.id}")
-
         await send_payment_link(message.chat.id, message.from_user.id)
     except Exception as e:
         logger.error(f"Помилка при відправці нагадування: {str(e)}")
@@ -37,7 +34,8 @@ async def process_payment(chat_id: int):
 
         await message.answer_video(
             video=settings.HYPOTHYROIDISM_VIDEO_FILE_ID,
-            caption="Ось ваше наступне відео про гіпотиреоз."
+            caption="Ось ваше наступне відео про гіпотиреоз.",
+            protect_content=True,
         )
     except Exception as e:
         logger.error(f"Помилка при відправці відео після оплати: {str(e)}")
@@ -46,10 +44,19 @@ async def process_payment(chat_id: int):
 async def hard_payment(message: Message):
     """Обробка натискання на кнопку оплати"""
     try:
-        logger.info(f"hard_payment user_id: {message.from_user.id}")
-        logger.info(f"phard_payment chat_id: {message.chat.id}")
         # Відправляємо нове повідомлення
         await send_payment_link(message.from_user.id, message.chat.id)
+
+    except Exception as e:
+        logger.error(f"Помилка при обробці платежу: {str(e)}")
+        await message.answer("Помилка при обробці платежу", show_alert=True)
+
+@router.message(F.text == "Контент")
+async def hard_content(message: Message):
+    """Обробка натискання на кнопку оплати"""
+    try:
+        # Відправляємо нове повідомлення
+        await process_payment(message.from_user.id)
 
     except Exception as e:
         logger.error(f"Помилка при обробці платежу: {str(e)}")

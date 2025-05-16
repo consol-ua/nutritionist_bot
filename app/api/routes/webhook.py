@@ -96,7 +96,7 @@ async def monobank_webhook(request: Request, chat_id: str):
                 scheduler.add_job(
                     job_id=invoice_id,
                     func=send_payment_reminder,
-                    trigger=DateTrigger(run_date=datetime.now() + timedelta(minutes=1)),
+                    trigger=DateTrigger(run_date=datetime.now() + timedelta(minutes=30)),
                     args=[chat_id, invoice_id]
                 )
         
