@@ -2,82 +2,6 @@
 
 ## Структура проекту
 
-```
-nutritionist_bot/
-├── app/
-│   ├── __init__.py
-│   ├── bot/
-│   │   ├── __init__.py
-│   │   ├── handlers/
-│   │   │   ├── __init__.py
-│   │   │   ├── common.py
-│   │   │   └── user.py
-│   │   ├── keyboards/
-│   │   │   ├── __init__.py
-│   │   │   └── reply.py
-│   │   └── middlewares/
-│   │       ├── __init__.py
-│   │       └── error_handler.py
-│   ├── api/
-│   │   ├── __init__.py
-│   │   ├── routes/
-│   │   │   ├── __init__.py
-│   │   │   └── webhook.py
-│   │   └── dependencies.py
-│   ├── core/
-│   │   ├── __init__.py
-│   │   ├── config.py
-│   │   ├── logging.py
-│   │   └── exceptions.py
-│   ├── db/
-│   │   ├── __init__.py
-│   │   └── firestore.py
-│   └── services/
-│       ├── __init__.py
-│       └── scheduler.py
-├── docker/
-│   ├── Dockerfile
-│   └── docker-compose.yml
-├── logs/
-├── tests/
-│   └── __init__.py
-├── .env.example
-├── .gitignore
-├── requirements.txt
-└── main.py
-```
-
-## Опис компонентів
-
-- `app/bot/` - Основний код телеграм бота
-
-  - `handlers/` - Обробники команд та повідомлень
-  - `keyboards/` - Клавіатури для бота
-  - `middlewares/` - Проміжні обробники (middleware)
-
-- `app/api/` - FastAPI додаток
-
-  - `routes/` - API ендпоінти
-  - `dependencies.py` - Залежності для API
-
-- `app/core/` - Ядро додатку
-
-  - `config.py` - Конфігурація
-  - `logging.py` - Налаштування логування
-  - `exceptions.py` - Глобальні винятки
-
-- `app/db/` - Робота з базою даних
-
-  - `firestore.py` - Інтеграція з Firestore
-
-- `app/services/` - Сервіси
-
-  - `scheduler.py` - Сервіс для відкладених повідомлень
-
-- `docker/` - Docker конфігурація
-- `logs/` - Директорія для логів
-- `tests/` - Тести
-
 ## Вимоги
 
 - Python 3.9+
@@ -137,7 +61,7 @@ python main.py
 2. Запустіть контейнери:
 
 ```bash
-docker-compose -f docker/docker-compose.yml up -d
+docker-compose -f docker/docker-compose.yml --env-file .env up -d
 ```
 
 3. Перевірте статус контейнерів:
@@ -161,7 +85,7 @@ docker-compose -f docker/docker-compose.yml down
 Перебудуйте Docker контейнер:
 
 ```bash
-docker-compose -f docker/docker-compose.yml up --build
+docker-compose -f docker/docker-compose.yml --env-file .env up -d --build
 ```
 
 ############################ Розгортання на Google Compute Engine
@@ -178,10 +102,22 @@ gcloud compute ssh instance-20250512-170304 --zone=europe-west1-b
 gcloud compute scp --recurse app docker .env main.py requirements.txt instance-20250512-170304:~/bot/ --zone=europe-west1-b
 ```
 
-4. Запустіть контейнер:
+4. Зупинка контейнера:
 
 ```bash
-docker-compose -f docker/docker-compose.yml --env-file .env up -d
+docker-compose -f docker/docker-compose.yml down
+```
+
+5. Запустіть контейнер:
+
+```bash
+docker-compose -f docker/docker-compose.yml --env-file .env up -d --build
+```
+
+6. Перегляньте логи:
+
+```bash
+docker-compose -f docker/docker-compose.yml logs -f
 ```
 
 ### Docker не запускається
