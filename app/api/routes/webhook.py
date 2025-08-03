@@ -36,6 +36,12 @@ async def webhook(request: Request):
 async def send_payment_reminder(chat_id: int, invoice_id: str):
     """Відправка нагадування про оплату"""
     try:
+        has_access = await firestore_client.user_has_access(chat_id)
+
+        if has_access:
+            logger.error("Has access")
+            return
+        
         logger.info(f"Starting payment reminder for invoice_id: {invoice_id}")
         
         if not invoice_id:
@@ -50,11 +56,7 @@ async def send_payment_reminder(chat_id: int, invoice_id: str):
         except Exception as e:
             logger.error(f"Failed to remove payment: {str(e)}")
         
-        # Викликаємо функцію з handlers/payment.py
         await send_payment_reminder_message(chat_id)
-        
-        # Оновлюємо статус в базі даних
-        await firestore_client.update_payment_status(invoice_id, "expired")
         
     except Exception as e:
         logger.error(f"Error sending payment reminder: {str(e)}")
@@ -80,6 +82,9 @@ async def monobank_webhook(request: Request, chat_id: str):
 
             await firestore_client.save_job_id(chat_id, None)
             await firestore_client.update_payment_status(invoice_id, status)
+            await firestore_client.update_user_access(chat_id)
+            logger.info(f"Reomove job: {invoice_id}")
+
             scheduler.remove_job(job_id=invoice_id)
 
         if status == 'created':
@@ -96,7 +101,7 @@ async def monobank_webhook(request: Request, chat_id: str):
                 scheduler.add_job(
                     job_id=invoice_id,
                     func=send_payment_reminder,
-                    trigger=DateTrigger(run_date=datetime.now() + timedelta(minutes=30)),
+                    trigger=DateTrigger(run_date=datetime.now() + timedelta(minutes=1)),
                     args=[chat_id, invoice_id]
                 )
         

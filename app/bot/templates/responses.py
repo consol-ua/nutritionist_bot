@@ -2,6 +2,8 @@ from aiogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
 from app.core.config import get_settings
 from app.bot.keyboards.phone import get_phone_keyboard, remove_keyboard
 from app.bot.templates.send_payment_link import send_payment_link
+from app.bot.texts.replies import BotReplies
+from app.bot.texts.buttons import BotButtons
 import logging
 
 logger = logging.getLogger(__name__)
@@ -13,63 +15,38 @@ async def send_welcome_video(message: Message):
         video=settings.START_VIDEO_FILE_ID
     )
 
-async def send_hypothyroidism_video(message: Message):
-    """Відправляє відео про гіпотиреоз та кнопку оплати"""
-    # Відправляємо відео
-    await message.answer_video(
-        video=settings.HYPOTHYROIDISM_VIDEO_FILE_ID
+async def send_welcome_certificate(message: Message):
+    """Відправляє сертифікат привітання"""
+    await message.answer_photo(
+        photo=settings.START_CERTIFICAT_ID
     )
-
-    logger.info(f"responses user_id: {message.chat.id}")
-    logger.info(f"responses chat_id: {message.from_user.id}")
-    
-    # Відправляємо повідомлення з кнопкою
-    await send_payment_link(message.chat.id, message.from_user.id)
 
 async def send_welcome_message(message: Message):
     """Відправляє привітальне повідомлення з інформацією про нутриціолога"""
-    await message.answer(
-        "Вітаю, на звʼязку *Світлана Марчик*\n\n"
-        "✅ Дипломований практикуючий *нутриціолог*\n"
-        "✅ Амбасадор Лондонського коледжу натуропатичної медицини (CNM)\n"
-        "✅ Health Coach (Європейська Асоціація Коучінга / European Coaching Association — ECA)\n"
-        "✅ Член Асоціації фахівців освітньої функціональної медицини (АСОФМ)\n"
-        "✅ Допомогла понад 500 людям стати здоровішими та щасливішими\n"
-        "✅ За моєю авторською методикою жінки стрункішають *без зривів*, при цьому харчуються смачно, різноманітно та корисно!\n",
+    await message.answer(BotReplies.WELCOME_MESSAGE,
         reply_markup=remove_keyboard(),
         parse_mode="Markdown"
     )
 
-async def survey_message(message: Message):
-    """Відправляє повідомлення з кнопкою для проходження тесту"""
-    keyboard = InlineKeyboardMarkup(
-        inline_keyboard=[
-            [InlineKeyboardButton(text="Пройти тест", callback_data="start_survey")]
-        ]
-    )
-
-    await message.answer(
-        "Для визначення стану щітоподібної залози:",
-        reply_markup=keyboard
-    )
+    await send_payment_link(message.chat.id, message.from_user.id)
 
 async def send_registration_request(message: Message):
     """Відправляє запит на реєстрацію з кнопкою для номера телефону"""
     await message.answer(
-        "Вітаю! Для реєстрації, будь ласка, натисніть кнопку нижче щоб надіслати свій номер телефону.",
+        BotReplies.REGISTRATION_REQUEST,
         reply_markup=get_phone_keyboard()
     )
 
 async def send_error_message(message: Message):
     """Відправляє повідомлення про помилку"""
     await message.answer(
-        "❌ Виникла помилка. Спробуйте пізніше."
+        BotReplies.ERROR_MESSAGE,
     )
 
 async def send_database_error(message: Message):
     """Відправляє повідомлення про помилку бази даних"""
     await message.answer(
-        "❌ Виникла помилка при збереженні даних. Спробуйте пізніше.",
+        BotReplies.DATABASE_ERROR,
         reply_markup=remove_keyboard()
     )
 
@@ -78,15 +55,14 @@ async def send_instagram_invite(message: Message):
     keyboard = InlineKeyboardMarkup(
         inline_keyboard=[
             [InlineKeyboardButton(
-                text="📲 Перейти в Instagram ✨",
-                url="https://www.instagram.com/nutritionist_svitlana_marchyk"
+                text=BotButtons.INSTAGRAM_BUTTON_TEXT,
+                url=BotButtons.INSTAGRAM_URL
             )]
         ]
     )
     
     await message.answer(
-        "🎉 Вітаю! Схоже, все добре, але щоб на 100% у цьому впевнитися 👌🏻, у мене для тебе є гарна пропозиція 💌\n"
-        "✍🏻 Напиши мені в дірект слово bot 🤖 — і отримай безкоштовну діагностичну консультацію 🩺✨",
+        BotReplies.INSTAGRAM_INVITE,
         reply_markup=keyboard,
         parse_mode="Markdown"
     )
@@ -96,14 +72,14 @@ async def send_only_instagram_invite(message: Message):
     keyboard = InlineKeyboardMarkup(
         inline_keyboard=[
             [InlineKeyboardButton(
-                text="📲 Перейти в Instagram ✨",
-                url="https://www.instagram.com/nutritionist_svitlana_marchyk"
+                text=BotButtons.INSTAGRAM_BUTTON_TEXT,
+                url=BotButtons.INSTAGRAM_URL
             )]
         ]
     )
     
     await message.answer(
-        "Контакт для зв'язку:",
+        BotReplies.ONLY_INSTAGRAM_INVITE,
         reply_markup=keyboard,
         parse_mode="Markdown"
     )

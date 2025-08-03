@@ -30,13 +30,29 @@ class Settings(BaseSettings):
     NGROK_AUTH_TOKEN: Optional[str] = None
 
     # Content
+    USERS_WITH_ACCESS:Dict[str, bool] = {}
+
     START_VIDEO_FILE_ID:str
+    START_CERTIFICAT_ID:str
     HYPOTHYROIDISM_VIDEO_FILE_ID:str
+
+    # Paid content
+    VIDEO_1_ID:str
+    DOC_1_ID:str
+    VIDEO_2_ID:str
+    VIDEO_3_ID:str
+    DOC_3_ID:str
+    VIDEO_4_ID:str
+    DOC_4_ID:str
+    VIDEO_5_ID:str
+    DOC_5_ID:str
+    VIDEO_6_ID:str
+    DOC_6_ID:str
+    VIDEO_7_ID:str
 
     # Monobank
     MONOBANK_API_TOKEN: str
     MONOBANK_WEBHOOK_URL: str
-
     class Config:
         env_file = ".env"
         env_file_encoding = 'utf-8'

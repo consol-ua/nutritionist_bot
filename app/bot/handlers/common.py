@@ -1,6 +1,8 @@
 from aiogram import Router, types, F
 from aiogram.filters import Command
 import logging
+from app.services.scheduler import scheduler
+
 
 logger = logging.getLogger(__name__)
 router = Router()
@@ -37,3 +39,9 @@ async def handle_file(message: types.Message):
             f"File ID: {file_id}"
         )
         logger.info(f"User {message.from_user.id} sent a file of type {file_type} with ID: {file_id}") 
+
+@router.message(F.text == "scheduler")
+async def handle_content_selection(message: types.Message):
+    jobs = scheduler.get_all_jobs()
+    
+    await message.answer(f'{jobs}') 

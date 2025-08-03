@@ -55,6 +55,28 @@ class FirestoreClient:
         except Exception as e:
             raise DatabaseError(f"Error checking user existence: {str(e)}")
 
+    async def user_has_access(self, user_id: int)-> bool:
+        """Перевіряє чи має доступ користувач"""
+        try:
+            user = await self.get_user(user_id)
+            if user.get('access'):
+                return True
+            else:
+                return False
+        except Exception as e:
+            raise DatabaseError(f"Error checking user existence: {str(e)}")
+
+    async def update_user_access(self, user_id: int):
+        """Перевіряє чи має доступ користувач"""
+        try:
+            self.users_collection.document(str(user_id)).update({
+                'access': firestore.SERVER_TIMESTAMP,
+                'updated_at': firestore.SERVER_TIMESTAMP
+            })
+
+        except Exception as e:
+            raise DatabaseError(f"Error checking user existence: {str(e)}")
+
     async def save_user(self, user_id: int, user_data: Dict[str, Any]):
         """Зберігає дані користувача"""
         try:
@@ -80,14 +102,15 @@ class FirestoreClient:
             logger.error(f"Error saving job_id: {str(e)}")
             raise
 
-    async def save_payment(self, user_id: int, invoice_id: str, status: str):
+    async def save_payment(self, user_id: int, invoice_id: str, status: str, payment_url: str):
         """Зберігає дані про платіж"""
         try:
             payment_data = {
                 'user_id': user_id,
                 'invoice_id': invoice_id,
                 'status': status,
-                'created_at': firestore.SERVER_TIMESTAMP
+                'created_at': firestore.SERVER_TIMESTAMP,
+                'payment_url': payment_url
             }
             self.payments_collection.document(invoice_id).set(payment_data)
         except Exception as e:
@@ -99,6 +122,18 @@ class FirestoreClient:
         try:
             doc = self.payments_collection.document(invoice_id).get()
             return doc.to_dict() if doc.exists else None
+        except Exception as e:
+            logger.error(f"Error getting payment data: {str(e)}")
+            raise
+
+    async def get_payment_by_user(self, user_id: int) -> Optional[Dict[str, Any]]:
+        """Отримує найновіший платіж за user_id"""
+        try:
+            # Шукаємо документи де user_id співпадає, сортуємо за created_at (найновіший перший)
+            docs = self.payments_collection.where('user_id', '==', user_id).order_by('created_at', direction=firestore.Query.DESCENDING).limit(1).get()
+            for doc in docs:
+                return doc.to_dict()
+            return None
         except Exception as e:
             logger.error(f"Error getting payment data: {str(e)}")
             raise

@@ -7,11 +7,11 @@ from app.db.firestore import firestore_client
 from app.core.exceptions import DatabaseError
 from app.bot.templates.responses import (
     send_welcome_video,
+    send_welcome_certificate,
     send_welcome_message,
     send_registration_request,
     send_error_message,
-    send_database_error,
-    survey_message
+    send_database_error
 )
 from google.cloud import firestore
 import logging
@@ -32,8 +32,8 @@ async def cmd_start(message: Message, state: FSMContext):
         
         if user_data and user_data.get('phone'):
             await send_welcome_video(message)
+            await send_welcome_certificate(message)
             await send_welcome_message(message)
-            await survey_message(message)
             
             return
             
@@ -67,8 +67,8 @@ async def process_phone(message: Message, state: FSMContext):
         
         await firestore_client.save_user(message.from_user.id, user_data)
         await send_welcome_video(message)
+        await send_welcome_certificate(message)
         await send_welcome_message(message)
-        await survey_message(message)
 
         await state.clear()
         
