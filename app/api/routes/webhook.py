@@ -20,7 +20,6 @@ dp = get_dispatcher()
 async def webhook(request: Request):
     try:
         update_dict = await request.json()
-        logger.info(f"received webhook: {update_dict}")
         
         # Конвертуємо словник в об'єкт Update
         update = Update.model_validate(update_dict)
@@ -39,20 +38,15 @@ async def send_payment_reminder(chat_id: int, invoice_id: str):
         has_access = await firestore_client.user_has_access(chat_id)
 
         if has_access:
-            logger.error("Has access")
             return
         
-        logger.info(f"Starting payment reminder for invoice_id: {invoice_id}")
-        
         if not invoice_id:
-            logger.error("Empty invoice_id received")
             return
             
         monobank_service = MonobankService(api_token=settings.MONOBANK_API_TOKEN)
         
         try:
             await monobank_service.remove_payment(invoice_id)
-            logger.info(f"Successfully removed payment for invoice_id: {invoice_id}")
         except Exception as e:
             logger.error(f"Failed to remove payment: {str(e)}")
         
@@ -60,16 +54,13 @@ async def send_payment_reminder(chat_id: int, invoice_id: str):
         
     except Exception as e:
         logger.error(f"Error sending payment reminder: {str(e)}")
-        logger.error(f"invoice_id: {invoice_id}")
 
 @router.post("/monobank/{chat_id}")
 async def monobank_webhook(request: Request, chat_id: str):
     """Обробка вебхука від Monobank"""
-    logger.info(f"Monobank chat_id: {chat_id}")
 
     try:
         data = await request.json()
-        logger.info(f"Received Monobank webhook: {data}")
         
         # Перевіряємо статус платежу
         invoice_id = data.get("invoiceId")
@@ -83,7 +74,6 @@ async def monobank_webhook(request: Request, chat_id: str):
             await firestore_client.save_job_id(chat_id, None)
             await firestore_client.update_payment_status(invoice_id, status)
             await firestore_client.update_user_access(chat_id)
-            logger.info(f"Reomove job: {invoice_id}")
 
             scheduler.remove_job(job_id=invoice_id)
 
@@ -95,8 +85,6 @@ async def monobank_webhook(request: Request, chat_id: str):
                 return {"status": "ok"}
                 
             if not job_id:
-                logger.info(f"Scheduling payment reminder for invoice_id: {invoice_id}")
-
                 await firestore_client.save_job_id(chat_id, invoice_id)
                 scheduler.add_job(
                     job_id=invoice_id,

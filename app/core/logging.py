@@ -38,8 +38,28 @@ def setup_logging():
     root_logger.addHandler(file_handler)
     root_logger.addHandler(console_handler)
 
-    # Налаштування логера для aiogram
+    # Налаштування логера для aiogram - збільшуємо рівень щоб зменшити спам
     aiogram_logger = logging.getLogger("aiogram")
-    aiogram_logger.setLevel(settings.LOG_LEVEL)
+    aiogram_logger.setLevel(logging.WARNING)
+    
+    # Налаштування логера для aiohttp - збільшуємо рівень
+    aiohttp_logger = logging.getLogger("aiohttp")
+    aiohttp_logger.setLevel(logging.WARNING)
+    
+    # Налаштування логера для asyncio - збільшуємо рівень
+    asyncio_logger = logging.getLogger("asyncio")
+    asyncio_logger.setLevel(logging.WARNING)
+    
+    # Налаштування логера для urllib3 - збільшуємо рівень
+    urllib3_logger = logging.getLogger("urllib3")
+    urllib3_logger.setLevel(logging.WARNING)
+    
+    # Налаштування логера для google.cloud - збільшуємо рівень
+    google_logger = logging.getLogger("google.cloud")
+    google_logger.setLevel(logging.WARNING)
+    
+    # Налаштування логера для google.auth - збільшуємо рівень
+    google_auth_logger = logging.getLogger("google.auth")
+    google_auth_logger.setLevel(logging.WARNING)
 
     return root_logger 

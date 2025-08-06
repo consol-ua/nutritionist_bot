@@ -17,7 +17,6 @@ async def send_payment_link(user_id: int, chat_id: int):
     try:
         user = await firestore_client.get_user(user_id)
 
-
         if user.get('access'):
             return
         
@@ -38,34 +37,25 @@ async def send_payment_link(user_id: int, chat_id: int):
 
         saved_payment = await firestore_client.get_payment_by_user(user_id)
 
-        logger.info(f'Check payment status {saved_payment}')
-
         local_payment_invoice_id = saved_payment.get("invoice_id") if saved_payment else None
-
 
         if local_payment_invoice_id:
             invoice = await monobank_service.check_payment_status(local_payment_invoice_id)
-            logger.info(f'Check invoice {invoice}')
 
             if invoice.get('status') == 'created':
-                logger.info('use saved payment')
                 payment_data = {
                     "pageUrl": saved_payment.get('payment_url'),
                     "invoiceId": local_payment_invoice_id
                 }
             else:
-                logger.info('create new payment')
                 payment_data = await monobank_service.create_payment(payment)
         else:
-            logger.info('create new payment')
             payment_data = await monobank_service.create_payment(payment)
 
         
         # Створюємо платіж і отримуємо URL
         payment_url = payment_data.get("pageUrl")
         payment_invoice_id = payment_data.get("invoiceId")
-
-        logger.info(f"invoiceId: {payment_invoice_id}")
 
         await firestore_client.save_payment(user_id, payment_invoice_id, "initialized", payment_url)
         

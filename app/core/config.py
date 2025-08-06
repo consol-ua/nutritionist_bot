@@ -34,7 +34,6 @@ class Settings(BaseSettings):
 
     START_VIDEO_FILE_ID:str
     START_CERTIFICAT_ID:str
-    HYPOTHYROIDISM_VIDEO_FILE_ID:str
 
     # Paid content
     VIDEO_1_ID:str

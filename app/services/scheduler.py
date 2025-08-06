@@ -27,7 +27,6 @@ class Scheduler:
                 **trigger_args
             )
             self.jobs[job_id] = job
-            logger.info(f"Added job {job_id}")
             return job
         except Exception as e:
             raise SchedulerError(f"Error adding job: {str(e)}")
@@ -37,7 +36,6 @@ class Scheduler:
             if job_id in self.jobs:
                 self.scheduler.remove_job(job_id)
                 del self.jobs[job_id]
-                logger.info(f"Removed job {job_id}")
         except Exception as e:
             raise SchedulerError(f"Error removing job: {str(e)}")
 

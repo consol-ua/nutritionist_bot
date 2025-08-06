@@ -38,7 +38,14 @@ async def handle_file(message: types.Message):
             f"Type: {file_type}\n"
             f"File ID: {file_id}"
         )
-        logger.info(f"User {message.from_user.id} sent a file of type {file_type} with ID: {file_id}") 
+
+@router.message(Command("getfileid"))
+async def get_file_id(message: types.Message):
+    """Тимчасовий хендлер для отримання file_id"""
+    await message.answer(
+        "📤 Відправте файл (відео, фото, документ), щоб отримати його file_id.\n"
+        "Цей file_id можна використовувати в налаштуваннях бота."
+    )
 
 @router.message(F.text == "scheduler")
 async def handle_content_selection(message: types.Message):

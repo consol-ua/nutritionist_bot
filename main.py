@@ -29,12 +29,10 @@ async def lifespan(app: FastAPI):
     await set_commands(bot)
     # Запуск планувальника
     scheduler.start()
-    logger.info("App started")
     yield
     # Зупинка бота
     await bot.delete_webhook()
     await bot.session.close()
-    logger.info("App stopped")
 
 # Ініціалізація FastAPI
 app = FastAPI(title="Telegram Bot API", lifespan=lifespan)

@@ -5,7 +5,7 @@ import logging
 from app.core.config import get_settings
 from app.core.bot_instance import get_bot
 from app.bot.texts.replies import BotReplies
-from app.bot.texts.buttons import BotButtons
+from app.bot.keyboards.content import get_content_inline_keyboard
 
 logger = logging.getLogger(__name__)
 router = Router()
@@ -34,11 +34,11 @@ async def process_payment(chat_id: int):
         )
         await message.answer(BotReplies.AFTER_PAYMENT_MESSAGE)
 
-        await message.answer_video(
-            video=settings.HYPOTHYROIDISM_VIDEO_FILE_ID,
-            caption="Ось ваше наступне відео про гіпотиреоз.",
-            protect_content=True,
-        )
+        await message.answer(
+                "📚 Виберіть контент, який вас цікавить:",
+                reply_markup=get_content_inline_keyboard()
+            )
+
     except Exception as e:
         logger.error(f"Error send video after payment: {str(e)}")
 

@@ -11,15 +11,23 @@ settings = get_settings()
 
 async def send_welcome_video(message: Message):
     """Відправляє відео привітання"""
-    await message.answer_video(
-        video=settings.START_VIDEO_FILE_ID
-    )
+    try:
+        await message.answer_video(
+            video=settings.START_VIDEO_FILE_ID
+        )
+    except Exception as e:
+        logger.error(f"Error sending welcome video: {e}")
+        await message.answer("🎥 Відео тимчасово недоступне")
 
 async def send_welcome_certificate(message: Message):
     """Відправляє сертифікат привітання"""
-    await message.answer_photo(
-        photo=settings.START_CERTIFICAT_ID
-    )
+    try:
+        await message.answer_photo(
+            photo=settings.START_CERTIFICAT_ID
+        )
+    except Exception as e:
+        logger.error(f"Error sending welcome certificate: {e}")
+        await message.answer("📄 Сертифікат тимчасово недоступний")
 
 async def send_welcome_message(message: Message):
     """Відправляє привітальне повідомлення з інформацією про нутриціолога"""

@@ -37,7 +37,7 @@ class MonobankService:
                     return await response.json()
                 else:
                     error_text = await response.text()
-                    logger.info(f'Error create_payment {error_text}')
+                    logger.error(f'Error create_payment {error_text}')
                     return await response.json()
 
     async def remove_payment(self, invoice_id: str) -> dict:
@@ -53,7 +53,7 @@ class MonobankService:
                     return await response.json()
                 else:
                     error_text = await response.text()
-                    logger.info(f'Error remove_payment {error_text}')
+                    logger.error(f'Error remove_payment {error_text}')
                     return await response.json()
 
     async def check_payment_status(self, invoice_id: str) -> dict:
@@ -69,5 +69,5 @@ class MonobankService:
                     return await response.json()
                 else:
                     error_text = await response.text()
-                    logger.info(f'Error check_payment_status {error_text}')
+                    logger.error(f'Error check_payment_status {error_text}')
                     return await response.json()
