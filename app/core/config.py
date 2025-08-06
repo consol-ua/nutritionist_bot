@@ -50,6 +50,8 @@ class Settings(BaseSettings):
     DOC_6_ID:str
     VIDEO_7_ID:str
 
+    CLOSED_TELEGRAM_GROUP:str
+
     # Monobank
     MONOBANK_API_TOKEN: str
     MONOBANK_WEBHOOK_URL: str

@@ -30,6 +30,12 @@ async def send_welcome_message(message: Message):
 
     await send_payment_link(message.chat.id, message.from_user.id)
 
+async def send_about_message(message: Message):
+    await message.answer(BotReplies.ABOUT_MESSAGE,
+        reply_markup=remove_keyboard(),
+        parse_mode="Markdown"
+    )
+
 async def send_registration_request(message: Message):
     """Відправляє запит на реєстрацію з кнопкою для номера телефону"""
     await message.answer(
@@ -83,6 +89,8 @@ async def send_only_instagram_invite(message: Message):
         reply_markup=keyboard,
         parse_mode="Markdown"
     )
+
+
 
 
 

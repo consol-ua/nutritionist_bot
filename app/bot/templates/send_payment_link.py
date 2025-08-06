@@ -15,6 +15,12 @@ bot = get_bot()
 async def send_payment_link(user_id: int, chat_id: int):
     """Відправляє посилання на оплату"""
     try:
+        user = await firestore_client.get_user(user_id)
+
+
+        if user.get('access'):
+            return
+        
         # Створюємо сервіс Monobank
         monobank_service = MonobankService(api_token=settings.MONOBANK_API_TOKEN)
         
@@ -38,8 +44,9 @@ async def send_payment_link(user_id: int, chat_id: int):
 
 
         if local_payment_invoice_id:
-            logger.info('Check payment status')
             invoice = await monobank_service.check_payment_status(local_payment_invoice_id)
+            logger.info(f'Check invoice {invoice}')
+
             if invoice.get('status') == 'created':
                 logger.info('use saved payment')
                 payment_data = {
@@ -79,7 +86,7 @@ async def send_payment_link(user_id: int, chat_id: int):
             )
         
     except Exception as e:
-        logger.error(f"Помилка при створенні платежу: {str(e)}")
+        logger.error(f"Error create payment: {str(e)}")
         await bot.send_message(
             chat_id=user_id,
             text=BotReplies.PAYMENT_ERROR

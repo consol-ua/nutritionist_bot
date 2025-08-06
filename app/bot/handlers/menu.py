@@ -1,14 +1,13 @@
 from aiogram import Router, F
 from aiogram.types import Message
 from aiogram.filters import Command
-from app.bot.templates.responses import send_only_instagram_invite, send_welcome_message
+from app.bot.templates.responses import send_only_instagram_invite, send_about_message, send_welcome_certificate
 from app.bot.texts.replies import BotReplies
-from app.bot.keyboards.content import get_content_keyboard
+from app.bot.keyboards.content import get_content_inline_keyboard
 from app.db.firestore import firestore_client
 from app.core.exceptions import DatabaseError
 from app.bot.templates.responses import send_payment_link
 import logging
-
 
 logger = logging.getLogger(__name__)
 router = Router()
@@ -21,7 +20,8 @@ async def handle_contact(message: Message):
 @router.message(Command("about"))
 async def handle_about(message: Message):
     """Обробка команди /about"""
-    await send_welcome_message(message)
+    await send_welcome_certificate(message)
+    await send_about_message(message)
 
 @router.message(Command("menu"))
 async def handle_menu(message: Message):
@@ -38,30 +38,19 @@ async def handle_content(message: Message):
         if has_access:
             await message.answer(
                 "📚 Виберіть контент, який вас цікавить:",
-                reply_markup=get_content_keyboard()
+                reply_markup=get_content_inline_keyboard()
             )
         else:
             await message.answer(
-                "🔒 У вас немає доступу до цього контенту. Для отримання доступу, будь ласка, оплатіть курс."
+                BotReplies.NOT_HAS_ACCESS_TO_CONTENT
             )
             await send_payment_link(message.chat.id, message.from_user.id)
             
     except DatabaseError as e:
         logger.error(f"Error checking user access: {e}")
-        await message.answer("❌ Виникла помилка при перевірці доступу. Спробуйте пізніше.")
+        await message.answer(BotReplies.ERROR_MESSAGE)
     except Exception as e:
         logger.error(f"Unexpected error in content handler: {e}")
-        await message.answer("❌ Виникла неочікувана помилка. Спробуйте пізніше.")
+        await message.answer(BotReplies.ERROR_MESSAGE)
 
-@router.message(F.text.in_(["Контент 1", "Контент 2", "Контент 3"]))
-async def handle_content_selection(message: Message):
-    """Обробка натискання кнопок контенту"""
-    content_map = {
-        "Контент 1": " Це перший блок контенту. Тут може бути інформація про щитоподібну залозу.",
-        "Контент 2": " Це другий блок контенту. Тут може бути інформація про харчування.",
-        "Контент 3": " Це третій блок контенту. Тут може бути інформація про вітаміни та мікроелементи."
-    }
-    
-    selected_content = content_map.get(message.text, "Контент не знайдено")
-    await message.answer(selected_content) 
 

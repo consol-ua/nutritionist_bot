@@ -13,17 +13,18 @@ async def set_commands(bot):
                 description=BotReplies.START_DESCRIPTION
             ),
             BotCommand(
-                command="contact",
-                description=BotReplies.CONTACT_DESCRIPTION
+                command="content",
+                description=BotReplies.CONTENT_DESCRIPTION
             ),
             BotCommand(
                 command="about",
                 description=BotReplies.ABOUT_DESCRIPTION
             ),
             BotCommand(
-                command="content",
-                description=BotReplies.CONTENT_DESCRIPTION
+                command="contact",
+                description=BotReplies.CONTACT_DESCRIPTION
             )
+
         ]
         
         await bot.set_my_commands(commands, scope=BotCommandScopeDefault())

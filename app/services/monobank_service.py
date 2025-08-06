@@ -2,6 +2,9 @@ from typing import Optional
 import aiohttp
 from pydantic import BaseModel
 from datetime import datetime
+import logging
+
+logger = logging.getLogger(__name__)
 
 class MonobankPayment(BaseModel):
     amount: int
@@ -34,7 +37,8 @@ class MonobankService:
                     return await response.json()
                 else:
                     error_text = await response.text()
-                    raise Exception(f"Помилка створення платежу: {error_text}")
+                    logger.info(f'Error create_payment {error_text}')
+                    return await response.json()
 
     async def remove_payment(self, invoice_id: str) -> dict:
         """
@@ -49,7 +53,8 @@ class MonobankService:
                     return await response.json()
                 else:
                     error_text = await response.text()
-                    raise Exception(f"Помилка видалення платежу: {error_text}")
+                    logger.info(f'Error remove_payment {error_text}')
+                    return await response.json()
 
     async def check_payment_status(self, invoice_id: str) -> dict:
         """
@@ -64,4 +69,5 @@ class MonobankService:
                     return await response.json()
                 else:
                     error_text = await response.text()
-                    raise Exception(f"Помилка перевірки статусу платежу: {error_text}") 
+                    logger.info(f'Error check_payment_status {error_text}')
+                    return await response.json()

@@ -32,7 +32,6 @@ async def cmd_start(message: Message, state: FSMContext):
         
         if user_data and user_data.get('phone'):
             await send_welcome_video(message)
-            await send_welcome_certificate(message)
             await send_welcome_message(message)
             
             return
@@ -67,7 +66,6 @@ async def process_phone(message: Message, state: FSMContext):
         
         await firestore_client.save_user(message.from_user.id, user_data)
         await send_welcome_video(message)
-        await send_welcome_certificate(message)
         await send_welcome_message(message)
 
         await state.clear()
