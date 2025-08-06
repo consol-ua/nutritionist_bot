@@ -32,6 +32,7 @@ async def cmd_start(message: Message, state: FSMContext):
         
         if user_data and user_data.get('phone'):
             await send_welcome_video(message)
+            await send_welcome_certificate(message)
             await send_welcome_message(message)
             
             return

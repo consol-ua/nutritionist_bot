@@ -72,7 +72,7 @@ class BotReplies:
   START_DESCRIPTION = "🏠 На початок"
   CONTACT_DESCRIPTION = "📱 Зв'язок зі мною"
   ABOUT_DESCRIPTION = "ℹ️ Про мене"
-  CONTENT_DESCRIPTION= "📚 Переглянути контен"
+  CONTENT_DESCRIPTION= "📚 Переглянути контент"
 
   PAYMENT_DESCRIPTION = "ℹ️ Щоб придбати курс, тисни оплатити"
   PAYMENT_SUCCESS = "✅ Оплачено успішно!"
