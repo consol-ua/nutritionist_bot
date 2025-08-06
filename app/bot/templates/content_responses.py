@@ -61,9 +61,9 @@ CONTENT_DATA = [
 
 async def send_content(message: Message, idx: int):
     data = CONTENT_DATA[idx]
-    await message.answer_video(video=data["video"])
+    await message.answer_video(video=data["video"], protect_content=True)
     if data["doc"]:
-        await message.answer_document(document=data["doc"])
+        await message.answer_document(document=data["doc"], protect_content=True)
 
     buttons = []
     if data["prev"]:

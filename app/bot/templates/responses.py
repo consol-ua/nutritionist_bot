@@ -13,7 +13,8 @@ async def send_welcome_video(message: Message):
     """Відправляє відео привітання"""
     try:
         await message.answer_video(
-            video=settings.START_VIDEO_FILE_ID
+            video=settings.START_VIDEO_FILE_ID,
+            protect_content=True
         )
     except Exception as e:
         logger.error(f"Error sending welcome video: {e}")
@@ -23,7 +24,8 @@ async def send_welcome_certificate(message: Message):
     """Відправляє сертифікат привітання"""
     try:
         await message.answer_photo(
-            photo=settings.START_CERTIFICAT_ID
+            photo=settings.START_CERTIFICAT_ID,
+            protect_content=True
         )
     except Exception as e:
         logger.error(f"Error sending welcome certificate: {e}")
