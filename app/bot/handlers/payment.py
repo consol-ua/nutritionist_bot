@@ -1,5 +1,5 @@
 from aiogram import Router, F
-from aiogram.types import Message, CallbackQuery
+from aiogram.types import Message
 from app.bot.templates.responses import send_payment_link
 import logging
 from app.core.config import get_settings

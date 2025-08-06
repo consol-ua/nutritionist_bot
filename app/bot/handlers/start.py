@@ -7,7 +7,6 @@ from app.db.firestore import firestore_client
 from app.core.exceptions import DatabaseError
 from app.bot.templates.responses import (
     send_welcome_video,
-    send_welcome_certificate,
     send_welcome_message,
     send_registration_request,
     send_error_message,
@@ -32,7 +31,6 @@ async def cmd_start(message: Message, state: FSMContext):
         
         if user_data and user_data.get('phone'):
             await send_welcome_video(message)
-            await send_welcome_certificate(message)
             await send_welcome_message(message)
             
             return

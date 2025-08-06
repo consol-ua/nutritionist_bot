@@ -10,4 +10,8 @@ class BotButtons:
   NEXT_VIDEO="➡️ Наступне відео"
   PREVIOUS_VIDEO="⬅️ Попереднє відео"
 
+  WELCOM_BTN_1 = "💡Що всередині курсу"
+  WELCOM_BTN_2 = "💬Для кого цей курс"
+  WELCOM_BTN_3 = "🎁Що отримаєш на курсі"
+
 

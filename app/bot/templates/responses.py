@@ -2,6 +2,7 @@ from aiogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
 from app.core.config import get_settings
 from app.bot.keyboards.phone import get_phone_keyboard, remove_keyboard
 from app.bot.templates.send_payment_link import send_payment_link
+from app.bot.keyboards.content import get_welcome_keyboard
 from app.bot.texts.replies import BotReplies
 from app.bot.texts.buttons import BotButtons
 import logging
@@ -33,8 +34,9 @@ async def send_welcome_certificate(message: Message):
 
 async def send_welcome_message(message: Message):
     """Відправляє привітальне повідомлення з інформацією про нутриціолога"""
-    await message.answer(BotReplies.WELCOME_MESSAGE,
-        reply_markup=remove_keyboard(),
+    
+    await message.answer(BotReplies.WELCOME_MESSAGE_1,
+        reply_markup=get_welcome_keyboard(),
         parse_mode="Markdown"
     )
 

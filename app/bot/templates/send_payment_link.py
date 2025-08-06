@@ -71,7 +71,7 @@ async def send_payment_link(user_id: int, chat_id: int):
 
         await bot.send_message(
                 chat_id=user_id,
-                text=BotReplies.PAYMENT_DESCRIPTION,
+                text=BotReplies.PAYMENT_MESSAGE,
                 reply_markup=keyboard
             )
         
