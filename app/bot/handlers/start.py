@@ -29,14 +29,24 @@ async def cmd_start(message: Message, state: FSMContext):
         # Перевіряємо чи користувач вже зареєстрований
         user_data = await firestore_client.get_user(message.from_user.id)
         
-        if user_data and user_data.get('phone'):
+        if user_data and user_data.get('user_id'):
             await send_welcome_video(message)
             await send_welcome_message(message)
             
             return
             
-        await send_registration_request(message)
-        await state.set_state(UserRegistration.waiting_for_phone)
+        user_data = {
+            'user_id': message.from_user.id,
+            'username': message.from_user.username,
+            'first_name': message.from_user.first_name,
+            'registered_at': firestore.SERVER_TIMESTAMP
+        }
+        
+        await firestore_client.save_user(message.from_user.id, user_data)
+        await send_welcome_video(message)
+        await send_welcome_message(message)
+
+        await state.clear()
         
     except DatabaseError as e:
         logger.error(f"Error checking user: {e}")

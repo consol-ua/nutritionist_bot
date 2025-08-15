@@ -13,48 +13,48 @@ CONTENT_DATA = [
         "video": settings.VIDEO_1_ID,
         "doc": settings.DOC_1_ID,
         "prev": None,
-        "next": "conten_2"
+        "next": "content_2"
     },
     # content_2
     {
         "video": settings.VIDEO_2_ID,
         "doc": None,
-        "prev": "conten_1",
-        "next": "conten_3"
+        "prev": "content_1",
+        "next": "content_3"
     },
     # content_3
     {
         "video": settings.VIDEO_3_ID,
         "doc": settings.DOC_3_ID,
-        "prev": "conten_2",
-        "next": "conten_4"
+        "prev": "content_2",
+        "next": "content_4"
     },
     # content_4
     {
         "video": settings.VIDEO_4_ID,
         "doc": settings.DOC_4_ID,
-        "prev": "conten_3",
-        "next": "conten_5"
+        "prev": "content_3",
+        "next": "content_5"
     },
     # content_5
     {
         "video": settings.VIDEO_5_ID,
         "doc": settings.DOC_5_ID,
-        "prev": "conten_4",
-        "next": "conten_6"
+        "prev": "content_4",
+        "next": "content_6"
     },
     # content_6
     {
         "video": settings.VIDEO_6_ID,
         "doc": settings.DOC_6_ID,
-        "prev": "conten_5",
-        "next": "conten_7"
+        "prev": "content_5",
+        "next": "content_7"
     },
     # content_7
     {
         "video": settings.VIDEO_7_ID,
         "doc": None,
-        "prev": "conten_6",
+        "prev": "content_6",
         "next": None
     }
 ]

@@ -23,12 +23,7 @@ async def set_commands(bot):
             BotCommand(
                 command="contact",
                 description=BotReplies.CONTACT_DESCRIPTION
-            ),
-            BotCommand(
-                command="getfileid",
-                description="Отримати file_id файлу (тимчасова команда)"
             )
-
         ]
         
         await bot.set_my_commands(commands, scope=BotCommandScopeDefault())

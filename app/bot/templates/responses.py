@@ -35,8 +35,8 @@ async def send_welcome_certificate(message: Message):
 async def send_welcome_message(message: Message):
     """Відправляє привітальне повідомлення з інформацією про нутриціолога"""
     
-    await message.answer(BotReplies.WELCOME_MESSAGE_1,
-        reply_markup=get_welcome_keyboard(),
+    await message.answer(BotReplies.WELCOME_MESSAGE_2,
+        reply_markup=get_welcome_keyboard('welcome_btn_2'),
         parse_mode="Markdown"
     )
 

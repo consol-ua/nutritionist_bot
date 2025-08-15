@@ -12,6 +12,6 @@ class BotButtons:
 
   WELCOM_BTN_1 = "💡Що всередині курсу"
   WELCOM_BTN_2 = "💬Для кого цей курс"
-  WELCOM_BTN_3 = "🎁Що отримаєш на курсі"
+  WELCOM_BTN_3 = "🎁Що отримаєш"
 
 
