@@ -56,6 +56,11 @@ class Settings(BaseSettings):
     WAYFORPAY_MERCHANT_SECRET_KEY: str
     WAYFORPAY_MERCHANT_DOMAIN_NAME: str
     WAYFORPAY_WEBHOOK_URL: str
+
+    # Monobank
+    MONOBANK_API_TOKEN: Optional[str] = None
+    MONOBANK_WEBHOOK_URL: Optional[str] = None
+
     class Config:
         env_file = ".env"
         env_file_encoding = 'utf-8'

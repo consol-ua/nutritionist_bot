@@ -2,6 +2,7 @@ from fastapi import APIRouter, Request, HTTPException
 from app.core.bot_instance import get_bot, get_dispatcher
 from aiogram.types import Update
 import logging
+import time
 from app.core.config import get_settings
 from app.db.firestore import firestore_client
 from datetime import datetime, timedelta
@@ -62,10 +63,12 @@ async def wayforpay_webhook(request: Request, chat_id: str):
             merchant_secret_key=settings.WAYFORPAY_MERCHANT_SECRET_KEY,
             merchant_domain_name=settings.WAYFORPAY_MERCHANT_DOMAIN_NAME
         )
+
+        logger.info(f"Webhook DATA: {data}")
         
-        if not wayforpay_service.verify_webhook_signature(data):
-            logger.warning(f"Invalid webhook signature for chat_id: {chat_id}")
-            raise HTTPException(status_code=400, detail="Invalid signature")
+        # if not wayforpay_service.verify_webhook_signature(data):
+        #     logger.warning(f"Invalid webhook signature for chat_id: {chat_id}")
+        #     raise HTTPException(status_code=400, detail="Invalid signature")
         
         # Перевіряємо статус платежу
         order_reference = data.get("orderReference")
@@ -75,6 +78,21 @@ async def wayforpay_webhook(request: Request, chat_id: str):
         if not order_reference:
             raise HTTPException(status_code=400, detail="No order reference provided")
         
+        has_access = await firestore_client.user_has_access(chat_id)
+
+
+        # у View/Endpoint:
+        response_time = int(time.time())
+        status = "accept"
+        response_signature = wayforpay_service.generate_wayforpay_webhook_response_signature(
+            order_reference=order_reference,
+            status=status,
+            time_value=response_time
+        )
+
+        if has_access:
+            return {"orderReference": order_reference, "status": "accept", "time": int(time.time()), "signature": response_signature}
+
         # WayForPay використовує transactionStatus та reasonCode
         # reasonCode 1100 = успішний платіж, transactionStatus = "Approved"
         if transaction_status == "Approved" or reason_code == 1100:
@@ -92,7 +110,7 @@ async def wayforpay_webhook(request: Request, chat_id: str):
             job_id = user.get('job_id')
             if user is None:
                 logger.warning(f"User {chat_id} not found in database")
-                return {"status": "ok"}
+                return {"orderReference": order_reference, "status": "accept", "time": int(time.time()), "signature": response_signature}
                 
             if not job_id:
                 await firestore_client.save_job_id(chat_id, order_reference)
@@ -103,7 +121,7 @@ async def wayforpay_webhook(request: Request, chat_id: str):
                     args=[chat_id, order_reference]
                 )
         
-        return {"status": "ok"}
+        return {"orderReference": order_reference, "status": "accept", "time": int(time.time()), "signature": response_signature}
         
     except Exception as e:
         logger.error(f"Error processing WayForPay webhook: {str(e)}", exc_info=True)

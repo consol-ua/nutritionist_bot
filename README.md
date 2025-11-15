@@ -102,6 +102,42 @@ gcloud compute ssh instance-20250512-170304 --zone=europe-west1-b
 gcloud compute scp --recurse app docker .env main.py requirements.txt instance-20250512-170304:~/bot/ --zone=europe-west1-b
 ```
 
+**Рекомендований метод (надійніший):**
+
+```bash
+# Спочатку директорії
+gcloud compute scp --recurse app instance-20250512-170304:~/bot/ --zone=europe-west1-b
+gcloud compute scp --recurse docker instance-20250512-170304:~/bot/ --zone=europe-west1-b
+
+# Потім окремі файли (важливо копіювати окремо, щоб уникнути проблем)
+gcloud compute scp main.py instance-20250512-170304:~/bot/ --zone=europe-west1-b
+gcloud compute scp requirements.txt instance-20250512-170304:~/bot/ --zone=europe-west1-b
+gcloud compute scp .env instance-20250512-170304:~/bot/ --zone=europe-west1-b
+```
+
+**Перевірка синхронізації (опціонально):**
+
+```bash
+# Перевірка розмірів ключових файлів
+for file in app/bot/templates/responses.py app/api/routes/webhook.py app/bot/templates/send_payment_link.py main.py; do
+  local_size=$(stat -f "%z" "$file" 2>/dev/null || echo "0")
+  remote_size=$(gcloud compute ssh instance-20250512-170304 --zone=europe-west1-b --command="stat -c '%s' ~/bot/$file 2>/dev/null || echo '0'" 2>/dev/null | tail -1)
+  if [ "$local_size" != "$remote_size" ]; then
+    echo "❌ $file: локально=$local_size, на сервері=$remote_size"
+  else
+    echo "✅ $file: $local_size байт"
+  fi
+done
+```
+
+**Примітка:** Команда `gcloud compute scp --recurse` іноді може пропускати
+окремі файли через тимчасові помилки. Якщо файл не оновився, скопіюйте його
+окремо:
+
+```bash
+gcloud compute scp app/services/wayforpay_service.py instance-20250512-170304:~/bot/app/services/ --zone=europe-west1-b
+```
+
 4. Зупинка контейнера:
 
 ```bash

@@ -29,8 +29,6 @@ async def send_payment_link(user_id: int, chat_id: int):
         )
         
         # Створюємо URL для повернення до бота
-        bot_username = settings.BOT_USERNAME
-        return_url = f"https://t.me/{bot_username}"
         service_url = f"{settings.WAYFORPAY_WEBHOOK_URL}/{user_id}"
         
         # Генеруємо унікальний order_reference
@@ -39,12 +37,11 @@ async def send_payment_link(user_id: int, chat_id: int):
         # Створюємо платіж
         payment = WayForPayPayment(
             order_reference=order_reference,
-            amount=340.00,  # 340 грн
+            amount=1.00,  # 340 грн
             currency="UAH",
             product_name=["Доступ до контенту"],
             product_count=[1],
-            product_price=[340.00],
-            return_url=return_url,
+            product_price=[1.00],
             service_url=service_url
         )
 
@@ -55,8 +52,12 @@ async def send_payment_link(user_id: int, chat_id: int):
         if local_payment_order_reference:
             invoice = await wayforpay_service.check_payment_status(local_payment_order_reference)
 
+            # Перевіряємо, чи є помилка в відповіді
+            if invoice.get('error'):
+                logger.warning(f"Error checking payment status: {invoice.get('error')}, creating new payment")
+                payment_data = await wayforpay_service.create_payment(payment)
             # Перевіряємо статус платежу (WayForPay використовує інші статуси)
-            if invoice.get('transactionStatus') == 'Approved' or invoice.get('reasonCode') == 1100:
+            elif invoice.get('transactionStatus') == 'Approved' or invoice.get('reasonCode') == 1100:
                 payment_data = {
                     "invoiceUrl": saved_payment.get('payment_url'),
                     "orderReference": local_payment_order_reference
@@ -66,11 +67,20 @@ async def send_payment_link(user_id: int, chat_id: int):
         else:
             payment_data = await wayforpay_service.create_payment(payment)
 
+        # Перевіряємо, чи є помилка в відповіді API
+        if payment_data.get('error'):
+            error_msg = payment_data.get('error', 'Unknown error')
+            logger.error(f"WayForPay API error: {error_msg}, Response: {payment_data}")
+            raise Exception(f"WayForPay API error: {error_msg}")
         
         # Створюємо платіж і отримуємо URL
         # WayForPay повертає invoiceUrl замість pageUrl
         payment_url = payment_data.get("invoiceUrl") or payment_data.get("pageUrl")
         payment_order_reference = payment_data.get("orderReference") or payment.order_reference
+        
+        if not payment_url:
+            logger.error(f"No payment URL in response: {payment_data}")
+            raise Exception("No payment URL received from WayForPay API")
 
         await firestore_client.save_payment(user_id, payment_order_reference, "initialized", payment_url)
         

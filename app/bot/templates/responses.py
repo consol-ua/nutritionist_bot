@@ -40,8 +40,6 @@ async def send_welcome_message(message: Message):
         parse_mode="Markdown"
     )
 
-    await message.answer('test message')
-
     await send_payment_link(message.chat.id, message.from_user.id)
 
 async def send_about_message(message: Message):
