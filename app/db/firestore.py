@@ -81,6 +81,7 @@ class FirestoreClient:
             payment_data = {
                 'user_id': user_id,
                 'invoice_id': invoice_id,
+                'order_reference': invoice_id,  # Для WayForPay order_reference = invoice_id
                 'status': status,
                 'payment_url': payment_url,
                 'created_at': firestore.SERVER_TIMESTAMP

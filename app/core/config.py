@@ -51,9 +51,11 @@ class Settings(BaseSettings):
 
     CLOSED_TELEGRAM_GROUP:str
 
-    # Monobank
-    MONOBANK_API_TOKEN: str
-    MONOBANK_WEBHOOK_URL: str
+    # WayForPay
+    WAYFORPAY_MERCHANT_ACCOUNT: str
+    WAYFORPAY_MERCHANT_SECRET_KEY: str
+    WAYFORPAY_MERCHANT_DOMAIN_NAME: str
+    WAYFORPAY_WEBHOOK_URL: str
     class Config:
         env_file = ".env"
         env_file_encoding = 'utf-8'
