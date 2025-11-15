@@ -37,11 +37,11 @@ async def send_payment_link(user_id: int, chat_id: int):
         # Створюємо платіж
         payment = WayForPayPayment(
             order_reference=order_reference,
-            amount=1.00,  # 340 грн
+            amount=340.00,  # 340 грн
             currency="UAH",
             product_name=["Доступ до контенту"],
             product_count=[1],
-            product_price=[1.00],
+            product_price=[340.00],
             service_url=service_url
         )
 
