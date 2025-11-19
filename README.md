@@ -99,7 +99,7 @@ gcloud compute ssh instance-20250512-170304 --zone=europe-west1-b
 3. Переносимо файли
 
 ```bash
-gcloud compute scp --recurse app docker .env main.py requirements.txt instance-20250512-170304:~/bot/ --zone=europe-west1-b
+gcloud compute scp --recurse app docker .env main.py requirements.txt admin@instance-20250512-170304:~/bot/ --zone=europe-west1-b
 ```
 
 4. Зупинка контейнера:
