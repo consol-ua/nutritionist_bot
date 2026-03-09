@@ -47,6 +47,21 @@ class FirestoreClient:
         except Exception as e:
             logger.error(f"Error getting user data: {str(e)}")
             raise DatabaseError(f"Error getting user data: {str(e)}")
+    async def get_user_by_username(self, username: str) -> Optional[Dict[str, Any]]:
+        """Отримує дані користувача за username"""
+        try:
+            # Видаляємо @ якщо є
+            username = username.lstrip('@')
+            query = self.users_collection.where('username', '==', username).limit(1)
+            docs = query.stream()
+            for doc in docs:
+                user_data = doc.to_dict()
+                user_data['user_id'] = doc.id
+                return user_data
+            return None
+        except Exception as e:
+            logger.error(f"Error getting user data by username: {str(e)}")
+            raise DatabaseError(f"Error getting user data by username: {str(e)}")
 
     async def save_user(self, user_id: int, user_data: Dict[str, Any]) -> None:
         """Зберігає дані користувача в базу даних"""

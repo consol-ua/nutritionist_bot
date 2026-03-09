@@ -90,31 +90,31 @@ docker-compose -f docker/docker-compose.yml --env-file .env up -d --build
 
 ############################ Розгортання на Google Compute Engine
 
-1. Підключаємося до GCE
+1. Переносимо файли
+
+```bash
+gcloud compute scp --recurse app docker .env main.py requirements.txt credentials.json admin@instance-20250512-170304:~/bot/ --zone=europe-west1-b
+```
+
+2. Підключаємося до GCE
 
 ```bash
 gcloud compute ssh instance-20250512-170304 --zone=europe-west1-b
 ```
 
-3. Переносимо файли
-
-```bash
-gcloud compute scp --recurse app docker .env main.py requirements.txt admin@instance-20250512-170304:~/bot/ --zone=europe-west1-b
-```
-
-4. Зупинка контейнера:
+3. Зупинка контейнера:
 
 ```bash
 docker-compose -f docker/docker-compose.yml down
 ```
 
-5. Запустіть контейнер:
+4. Запустіть контейнер:
 
 ```bash
 docker-compose -f docker/docker-compose.yml --env-file .env up -d --build
 ```
 
-6. Перегляньте логи:
+5. Перегляньте логи:
 
 ```bash
 docker-compose -f docker/docker-compose.yml logs -f

@@ -29,6 +29,9 @@ class Settings(BaseSettings):
     # Ngrok
     NGROK_AUTH_TOKEN: Optional[str] = None
 
+    # Admin Settings
+    ADMIN_IDS: str = ""
+
     # Content
     USERS_WITH_ACCESS:Dict[str, bool] = {}
 
@@ -61,6 +64,12 @@ class Settings(BaseSettings):
 
     def is_production(self) -> bool:
         return self.ENVIRONMENT == "production"
+
+    @property
+    def admin_ids_list(self) -> list[int]:
+        if not self.ADMIN_IDS:
+            return []
+        return [int(admin_id.strip()) for admin_id in self.ADMIN_IDS.split(",") if admin_id.strip().isdigit()]
 
     def get_google_credentials(self) -> Optional[Dict[str, str]]:
         if self.is_production():
