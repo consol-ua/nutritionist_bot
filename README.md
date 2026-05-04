@@ -1,49 +1,140 @@
-# Telegram Bot на Google Cloud Run
+# Telegram Bot Project
 
-## Опис проекту
+## Структура проекту
 
-Цей проект представляє собою Telegram бота, який розгортається на Google Cloud
-Run.
+## Вимоги
 
-## Конфігурація проекту
+- Python 3.9+
+- Docker
+- Google Cloud SDK
 
-Проект використовує наступні налаштування:
+## Встановлення
 
-### Python налаштування
+### 1. Встановлення Docker (MacOS)
 
-- Форматування коду: Black
-- Лінтер: Pylint
-- Автоматичне організування імпортів
-- Автоматичне форматування при збереженні
+1. Завантажте Docker Desktop для Mac з
+   [офіційного сайту](https://www.docker.com/products/docker-desktop)
+2. Встановіть завантажений пакет
+3. Перезавантажте комп'ютер
+4. Запустіть Docker Desktop з папки Applications
+5. Дочекайтеся повного запуску (іконка в меню буде показувати, що Docker працює)
+6. Перевірте встановлення:
 
-### Ігноровані файли
+```bash
+docker --version
+docker-compose --version
+```
 
-- Віртуальне середовище (venv)
-- Кеш Python (**pycache**, \*.pyc)
-- Конфігураційні файли (.env, .git)
-- Логи (\*.log)
-- Docker файли (Dockerfile, docker-compose.yml, .dockerignore)
-- Cloud Build конфігурація (cloudbuild.yaml)
-- Залежності Python (requirements.txt)
-- YAML файли (_.yaml, _.yml)
+### 2. Встановлення проекту
 
-### Telegram налаштування
+1. Клонуйте репозиторій
+2. Створіть віртуальне середовище:
 
-- Bot Token
-- Webhook URL
+```bash
+python3 -m venv venv
+source venv/bin/activate  # для Linux/Mac
+```
 
-### Google Cloud налаштування
+3. Встановіть залежності:
 
-- Project ID
-- Region
-- Service Name
+```bash
+pip install -r requirements.txt
+```
 
-## Встановлення та запуск
+4. Скопіюйте `.env.example` в `.env` та налаштуйте змінні середовища:
 
-(Тут буде додана інструкція з встановлення та запуску)
+```bash
+cp .env.example .env
+```
 
-для запуску:
+## Запуск
 
-python3 main/main.py
+### Локальний запуск
 
-ngrok http 8080
+```bash
+python main.py
+```
+
+### Docker
+
+1. Переконайтеся, що Docker Desktop запущений
+2. Запустіть контейнери:
+
+```bash
+docker-compose -f docker/docker-compose.yml --env-file .env up -d
+```
+
+3. Перевірте статус контейнерів:
+
+```bash
+docker-compose -f docker/docker-compose.yml ps
+```
+
+4. Перегляньте логи:
+
+```bash
+docker-compose -f docker/docker-compose.yml logs -f
+```
+
+5. Зупинка контейнера:
+
+```bash
+docker-compose -f docker/docker-compose.yml down
+```
+
+Перебудуйте Docker контейнер:
+
+```bash
+docker-compose -f docker/docker-compose.yml --env-file .env up -d --build
+```
+
+############################ Розгортання на Google Compute Engine
+
+1. Переносимо файли
+
+```bash
+gcloud compute scp --recurse app docker .env main.py requirements.txt credentials.json admin@instance-20250512-170304:~/bot/ --zone=europe-west1-b
+```
+
+2. Підключаємося до GCE
+
+```bash
+gcloud compute ssh instance-20250512-170304 --zone=europe-west1-b
+```
+
+3. Зупинка контейнера:
+
+```bash
+docker-compose -f docker/docker-compose.yml down
+```
+
+4. Запустіть контейнер:
+
+```bash
+docker-compose -f docker/docker-compose.yml --env-file .env up -d --build
+```
+
+5. Перегляньте логи:
+
+```bash
+docker-compose -f docker/docker-compose.yml logs -f
+```
+
+### Docker не запускається
+
+1. Перевірте, чи запущений Docker Desktop
+2. Спробуйте перезапустити Docker Desktop
+3. Перевірте статус Docker:
+
+```bash
+docker info
+```
+
+### Помилка з ngrok
+
+1. Перевірте наявність токена ngrok в `.env`
+2. Перевірте логи ngrok:
+
+```bash
+docker-compose -f docker/docker-compose.yml logs ngrok
+```
